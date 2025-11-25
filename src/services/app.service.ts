@@ -10,7 +10,7 @@ export class AppService {
   async testDB() {
     const newUserrrrr = await this.userModel.create({
       name: "Qaiser Manzoor",
-      email: "fsdlab@austd.com"
+      email: "fsdlabsss@austd.com"
 
     });
     return newUserrrrr;
