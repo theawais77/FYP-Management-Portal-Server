@@ -1,16 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AppController } from '../controllers/app.controller';
-import { AppService } from '../services/app.service';
+// import { AppController } from '../controllers/app.controller';
+// import { AppService } from '../services/app.service';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserSchema } from 'src/schema/user.schema';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { JWT_CONFIG } from 'src/common/constants/constants';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/common/guards/roles.guard';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Student, StudentSchema } from '../schema/student.schema';
+import { Supervisor, SupervisorSchema } from '../schema/supervisor.schema';
+import { Coordinator, CoordinatorSchema } from '../schema/coordinator.schema';
+import { AuthModule } from './auth.module';
 
 @Module({
   imports: [
@@ -19,18 +18,16 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
       isGlobal: true,
     }),
     MongooseModule.forRoot(process.env.CONNECTION_STRING!),
-    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: JWT_CONFIG.SECRET,
-      signOptions: { expiresIn: JWT_CONFIG.EXPIRES_IN as any },
-    }),
+    MongooseModule.forFeature([
+      { name: Student.name, schema: StudentSchema },
+      { name: Supervisor.name, schema: SupervisorSchema },
+      { name: Coordinator.name, schema: CoordinatorSchema },
+    ]),
+    AuthModule,
   ],
-
-  controllers: [AppController],
+  // controllers: [AppController],
   providers: [
-    AppService,
-    JwtStrategy,
+    // AppService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

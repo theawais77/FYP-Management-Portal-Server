@@ -8,7 +8,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api/v1');
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -29,6 +29,7 @@ async function bootstrap() {
     .setTitle('FYP Management Portal')
     .setDescription('API documentation for FYP Management Portal')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);

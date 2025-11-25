@@ -20,7 +20,7 @@ export enum SubmissionStatus {
 
 export const JWT_CONFIG = {
   SECRET: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
-  EXPIRES_IN: '7d',
+  EXPIRES_IN: '7d' as const,
 };
 
 export const BCRYPT_SALT_ROUNDS = 10;
