@@ -6,10 +6,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { Student, StudentSchema } from '../schema/student.schema';
-import { Supervisor, SupervisorSchema } from '../schema/supervisor.schema';
-import { Coordinator, CoordinatorSchema } from '../schema/coordinator.schema';
 import { AuthModule } from './auth.module';
+import { DepartmentModule } from './department.module';
+import { FacultyModule } from './faculty.module';
 
 @Module({
   imports: [
@@ -18,16 +17,13 @@ import { AuthModule } from './auth.module';
       isGlobal: true,
     }),
     MongooseModule.forRoot(process.env.CONNECTION_STRING!),
-    MongooseModule.forFeature([
-      { name: Student.name, schema: StudentSchema },
-      { name: Supervisor.name, schema: SupervisorSchema },
-      { name: Coordinator.name, schema: CoordinatorSchema },
-    ]),
     AuthModule,
+    DepartmentModule,
+    FacultyModule
   ],
   // controllers: [AppController],
   providers: [
-    // AppService,
+    // AppService
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
