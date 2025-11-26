@@ -42,8 +42,6 @@ export class Student extends BaseUser {
 
 export const StudentSchema = SchemaFactory.createForClass(Student);
 
-StudentSchema.index({ email: 1 });
-StudentSchema.index({ rollNumber: 1 });
 StudentSchema.index({ assignedSupervisor: 1 });
 StudentSchema.index({ department: 1, semester: 1 });
 

@@ -29,8 +29,6 @@ export class Coordinator extends BaseUser {
 
 export const CoordinatorSchema = SchemaFactory.createForClass(Coordinator);
 
-CoordinatorSchema.index({ email: 1 });
-CoordinatorSchema.index({ coordinatorId: 1 });
 CoordinatorSchema.index({ department: 1 });
 
 CoordinatorSchema.virtual('fullName').get(function(this: CoordinatorDocument) {

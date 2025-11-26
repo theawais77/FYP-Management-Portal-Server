@@ -47,8 +47,6 @@ export class Supervisor extends BaseUser {
 
 export const SupervisorSchema = SchemaFactory.createForClass(Supervisor);
 
-SupervisorSchema.index({ email: 1 });
-SupervisorSchema.index({ employeeId: 1 });
 SupervisorSchema.index({ isAvailableForSupervision: 1 });
 SupervisorSchema.index({ specialization: 1 });
 
