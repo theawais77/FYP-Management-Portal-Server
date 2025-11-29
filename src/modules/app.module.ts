@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-// import { AppController } from '../controllers/app.controller';
-// import { AppService } from '../services/app.service';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { APP_GUARD } from '@nestjs/core';
@@ -9,6 +7,8 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { AuthModule } from './auth.module';
 import { DepartmentModule } from './department.module';
 import { FacultyModule } from './faculty.module';
+import { UserModule } from './user.module';
+import { AnnouncementModule } from './announcement.module';
 
 @Module({
   imports: [
@@ -19,7 +19,9 @@ import { FacultyModule } from './faculty.module';
     MongooseModule.forRoot(process.env.CONNECTION_STRING!),
     AuthModule,
     DepartmentModule,
-    FacultyModule
+    FacultyModule,
+    UserModule,
+    AnnouncementModule,
   ],
   // controllers: [AppController],
   providers: [
