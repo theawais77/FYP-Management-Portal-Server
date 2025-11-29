@@ -14,7 +14,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../common/constants/constants';
 import { FacultyService } from 'src/services/faculty/faculty.service';
 
-@ApiTags('Faculty Management')
+@ApiTags('Coordinator - Faculty Management')
 @Controller('departments/:departmentId/faculty')
 @ApiBearerAuth()
 @Roles(UserRole.COORDINATOR)
@@ -71,7 +71,7 @@ export class FacultyController {
 }
 
 // Separate controller for general faculty operations
-@ApiTags('Faculty Management')
+@ApiTags('Coordinator - Faculty Management')
 @Controller('faculty')
 @ApiBearerAuth()
 @Roles(UserRole.COORDINATOR)

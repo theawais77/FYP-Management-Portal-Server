@@ -12,7 +12,7 @@ import { UserRole } from '../common/constants/constants';
 import { ProjectService } from 'src/services/project/project.service';
 import { SelectIdeaDto, RequestCustomIdeaDto } from 'src/dto/student.dto';
 
-@ApiTags('Projects')
+@ApiTags('Student - Projects')
 @Controller('projects')
 @ApiBearerAuth()
 @Roles(UserRole.STUDENT)

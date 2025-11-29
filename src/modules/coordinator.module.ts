@@ -1,0 +1,31 @@
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Group, GroupSchema } from '../schema/group.schema';
+import { Supervisor, SupervisorSchema } from '../schema/supervisor.schema';
+import { Project, ProjectSchema } from '../schema/project.schema';
+import { Proposal, ProposalSchema } from '../schema/proposal.schema';
+import { CoordinatorGroupController } from '../controllers/coordinator-group.controller';
+import { CoordinatorSupervisorController } from '../controllers/coordinator-project.controller';
+import { CoordinatorProjectMonitorController } from '../controllers/coordinator-monitor.controller';
+import { CoordinatorProposalMonitorController } from '../controllers/coordinator-proposal.controller';
+import { CoordinatorService } from '../services/coordinator/coordinator.service';
+
+@Module({
+  imports: [
+    MongooseModule.forFeature([
+      { name: Group.name, schema: GroupSchema },
+      { name: Supervisor.name, schema: SupervisorSchema },
+      { name: Project.name, schema: ProjectSchema },
+      { name: Proposal.name, schema: ProposalSchema },
+    ]),
+  ],
+  controllers: [
+    CoordinatorGroupController,
+    CoordinatorSupervisorController,
+    CoordinatorProjectMonitorController,
+    CoordinatorProposalMonitorController,
+  ],
+  providers: [CoordinatorService],
+  exports: [CoordinatorService],
+})
+export class CoordinatorModule {}

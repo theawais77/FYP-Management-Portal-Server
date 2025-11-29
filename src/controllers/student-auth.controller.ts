@@ -8,7 +8,7 @@ import { StudentRegisterDto, LoginDto } from 'src/dto/auth.dto';
 import { StudentAuthService } from 'src/services/auth/student-auth.service';
 
 
-@ApiTags('Student Auth')
+@ApiTags('Student - Auth')
 @Controller('auth/student')
 export class StudentAuthController {
   constructor(private studentAuthService: StudentAuthService) {}

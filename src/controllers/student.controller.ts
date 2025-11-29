@@ -11,7 +11,7 @@ import { UserRole } from '../common/constants/constants';
 import { StudentService } from 'src/services/student/student.service';
 import { RegisterFYPDto } from 'src/dto/student.dto';
 
-@ApiTags('Students')
+@ApiTags('Student - FYP Registration')
 @Controller('students')
 @ApiBearerAuth()
 @Roles(UserRole.STUDENT)

@@ -7,7 +7,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { CreateSupervisorDto, LoginDto, SetSupervisorPasswordDto, UpdateSupervisorProfileDto } from 'src/dto/auth.dto';
 import { SupervisorAuthService } from 'src/services/auth/supervisor.auth.service';
 
-@ApiTags('Supervisor Auth')
+@ApiTags('Supervisor - Auth')
 @Controller('auth/supervisor')
 export class SupervisorAuthController {
   constructor(private supervisorAuthService: SupervisorAuthService) {}

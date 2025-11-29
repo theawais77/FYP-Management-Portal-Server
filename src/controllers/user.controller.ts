@@ -9,7 +9,7 @@ import { UserRole } from '../common/constants/constants';
 import { GetUsersQueryDto } from 'src/dto/user.dto';
 import { UserService } from 'src/services/user/user.service';
 
-@ApiTags('User Management')
+@ApiTags('Coordinator - User Management')
 @Controller('users')
 @ApiBearerAuth()
 @Roles(UserRole.COORDINATOR)

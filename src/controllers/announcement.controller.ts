@@ -15,7 +15,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '../common/constants/constants';
 import { AnnouncementService } from 'src/services/announcement/announcement.service';
 
-@ApiTags('Announcements')
+@ApiTags('Coordinator - Announcements')
 @Controller('announcements')
 @ApiBearerAuth()
 export class AnnouncementController {

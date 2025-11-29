@@ -13,6 +13,7 @@ import { StudentModule } from './student.module';
 import { GroupModule } from './group.module';
 import { ProjectModule } from './project.module';
 import { ProposalModule } from './proposal.module';
+import { CoordinatorModule } from './coordinator.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ProposalModule } from './proposal.module';
     GroupModule,
     ProjectModule,
     ProposalModule,
+    CoordinatorModule,
   ],
   // controllers: [AppController],
   providers: [

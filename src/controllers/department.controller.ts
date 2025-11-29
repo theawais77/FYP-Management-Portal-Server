@@ -16,7 +16,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '../common/constants/constants';
 import { DepartmentService } from 'src/services/department/department.service';
 
-@ApiTags('Departments')
+@ApiTags('Coordinator - Departments')
 @Controller('departments')
 @ApiBearerAuth()
 @Roles(UserRole.COORDINATOR)

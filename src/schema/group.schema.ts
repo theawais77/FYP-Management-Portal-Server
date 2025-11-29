@@ -22,9 +22,6 @@ export class Group {
 
   @Prop({ type: String, ref: 'Project' })
   project?: string;
-
-  @Prop({ default: false })
-  isRegisteredForFYP: boolean;
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);

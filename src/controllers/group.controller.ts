@@ -5,22 +5,23 @@ import {
   Get,
   Body,
   Param,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '../common/constants/constants';
 import { GroupService } from 'src/services/group/group.service';
 import { CreateGroupDto, AddMemberDto } from 'src/dto/student.dto';
 
-@ApiTags('Groups')
+@ApiTags('Students - Groups')
 @Controller('groups')
 @ApiBearerAuth()
-@Roles(UserRole.STUDENT)
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
   @Post()
+  @Roles(UserRole.STUDENT)
   @ApiOperation({ summary: 'Create a new group (Student becomes leader)' })
   async createGroup(
     @CurrentUser('userId') studentId: string,
@@ -30,6 +31,7 @@ export class GroupController {
   }
 
   @Put(':groupId/add-member')
+  @Roles(UserRole.STUDENT)
   @ApiOperation({ summary: 'Add member to group (Leader only)' })
   async addMember(
     @Param('groupId') groupId: string,
@@ -40,6 +42,7 @@ export class GroupController {
   }
 
   @Put(':groupId/remove-member/:memberId')
+  @Roles(UserRole.STUDENT)
   @ApiOperation({ summary: 'Remove member from group (Leader only)' })
   async removeMember(
     @Param('groupId') groupId: string,
@@ -50,6 +53,7 @@ export class GroupController {
   }
 
   @Put(':groupId/leave')
+  @Roles(UserRole.STUDENT)
   @ApiOperation({ summary: 'Leave group (Members only, not leader)' })
   async leaveGroup(
     @Param('groupId') groupId: string,
@@ -59,6 +63,7 @@ export class GroupController {
   }
 
   @Get('my-group')
+  @Roles(UserRole.STUDENT)
   @ApiOperation({ summary: 'Get own group details' })
   async getMyGroup(@CurrentUser('userId') studentId: string) {
     return this.groupService.getMyGroup(studentId);

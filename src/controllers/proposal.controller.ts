@@ -19,7 +19,7 @@ import { UploadDocumentDto } from 'src/dto/student.dto';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 
-@ApiTags('Proposals & Documents')
+@ApiTags('Student - Proposals & Documents')
 @Controller()
 @ApiBearerAuth()
 @Roles(UserRole.STUDENT)
