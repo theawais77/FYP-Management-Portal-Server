@@ -36,6 +36,9 @@ export class Student extends BaseUser {
   @Prop({ type: String, ref: 'Project' })
   currentProject?: string;
 
+  @Prop({ default: false })
+  isRegisteredForFYP: boolean;
+
   @Prop({ min: 0, max: 4 })
   cgpa?: number;
 }

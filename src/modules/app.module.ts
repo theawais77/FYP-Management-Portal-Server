@@ -9,6 +9,10 @@ import { DepartmentModule } from './department.module';
 import { FacultyModule } from './faculty.module';
 import { UserModule } from './user.module';
 import { AnnouncementModule } from './announcement.module';
+import { StudentModule } from './student.module';
+import { GroupModule } from './group.module';
+import { ProjectModule } from './project.module';
+import { ProposalModule } from './proposal.module';
 
 @Module({
   imports: [
@@ -22,6 +26,10 @@ import { AnnouncementModule } from './announcement.module';
     FacultyModule,
     UserModule,
     AnnouncementModule,
+    StudentModule,
+    GroupModule,
+    ProjectModule,
+    ProposalModule,
   ],
   // controllers: [AppController],
   providers: [
