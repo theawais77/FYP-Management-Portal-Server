@@ -14,6 +14,7 @@ import { GroupModule } from './group.module';
 import { ProjectModule } from './project.module';
 import { ProposalModule } from './proposal.module';
 import { CoordinatorModule } from './coordinator.module';
+import { SupervisorModule } from './supervisor.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CoordinatorModule } from './coordinator.module';
     ProjectModule,
     ProposalModule,
     CoordinatorModule,
+    SupervisorModule,
   ],
   // controllers: [AppController],
   providers: [

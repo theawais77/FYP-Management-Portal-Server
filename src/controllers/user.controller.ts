@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Query,
+  Delete,
+  Param,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -40,5 +42,18 @@ export class UserController {
   @ApiQuery({ name: 'department', required: false })
   async getUsersSummary(@Query('department') department?: string) {
     return this.userService.getUsersSummary(department);
+  }
+
+  @Delete(':userId')
+  @ApiOperation({ 
+    summary: 'Permanently delete a user (Coordinator only)',
+    description: 'Delete a student or supervisor from the system. Cannot delete users with active assignments.'
+  })
+  @ApiQuery({ name: 'role', enum: UserRole, required: true, description: 'student or supervisor' })
+  async deleteUser(
+    @Param('userId') userId: string,
+    @Query('role') role: string,
+  ) {
+    return this.userService.deleteUser(userId, role);
   }
 }

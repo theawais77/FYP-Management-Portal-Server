@@ -89,8 +89,9 @@ export class SupervisorAuthService {
     }
 
     const hashedPassword = await bcrypt.hash(dto.newPassword, BCRYPT_SALT_ROUNDS);
-    supervisor.password = hashedPassword;
-    await supervisor.save();
+    await this.supervisorModel.findByIdAndUpdate(supervisorId, {
+      password: hashedPassword,
+    });
 
     return {
       message: 'Password updated successfully',
@@ -98,14 +99,15 @@ export class SupervisorAuthService {
   }
 
   async updateProfile(supervisorId: string, dto: UpdateSupervisorProfileDto) {
-    const supervisor = await this.supervisorModel.findById(supervisorId);
+    const supervisor = await this.supervisorModel.findByIdAndUpdate(
+      supervisorId,
+      dto,
+      { new: true, runValidators: true }
+    );
 
     if (!supervisor) {
       throw new NotFoundException('Supervisor not found');
     }
-
-    Object.assign(supervisor, dto);
-    await supervisor.save();
 
     return {
       message: 'Profile updated successfully',

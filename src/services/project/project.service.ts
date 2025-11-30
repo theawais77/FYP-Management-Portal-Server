@@ -76,17 +76,20 @@ export class ProjectService {
       throw new BadRequestException('This idea does not belong to your assigned supervisor');
     }
 
-    project.selectedIdea = dto.ideaId;
-    project.customIdeaTitle = undefined;
-    project.customIdeaDescription = undefined;
-    project.ideaStatus = ProjectStatus.PENDING;
-    await project.save();
+    await this.projectModel.findByIdAndUpdate(project._id, {
+      selectedIdea: dto.ideaId,
+      $unset: { customIdeaTitle: '', customIdeaDescription: '' },
+      ideaStatus: ProjectStatus.PENDING,
+    });
+
+    const updatedProject = await this.projectModel
+      .findById(project._id)
+      .populate('selectedIdea')
+      .populate('supervisor', 'firstName lastName email');
 
     return {
       message: 'Project idea selected successfully. Waiting for supervisor approval.',
-      project: await (await project
-          .populate('selectedIdea'))
-        .populate('supervisor', 'firstName lastName email'),
+      project: updatedProject,
     };
   }
 
@@ -111,15 +114,20 @@ export class ProjectService {
       throw new NotFoundException('No project found for your group');
     }
 
-    project.customIdeaTitle = dto.title;
-    project.customIdeaDescription = dto.description;
-    project.selectedIdea = undefined;
-    project.ideaStatus = ProjectStatus.PENDING;
-    await project.save();
+    await this.projectModel.findByIdAndUpdate(project._id, {
+      customIdeaTitle: dto.title,
+      customIdeaDescription: dto.description,
+      $unset: { selectedIdea: '' },
+      ideaStatus: ProjectStatus.PENDING,
+    });
+
+    const updatedProject = await this.projectModel
+      .findById(project._id)
+      .populate('supervisor', 'firstName lastName email');
 
     return {
       message: 'Custom idea request submitted successfully. Waiting for supervisor approval.',
-      project: await project.populate('supervisor', 'firstName lastName email'),
+      project: updatedProject,
     };
   }
 

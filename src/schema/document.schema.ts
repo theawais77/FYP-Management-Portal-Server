@@ -10,6 +10,12 @@ export enum DocumentType {
   OTHER = 'other',
 }
 
+export enum DocumentStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}
+
 @Schema({ timestamps: true, collection: 'fyp_documents' })
 export class FYPDocument {
   @Prop({ type: String, ref: 'Project', required: true })
@@ -39,6 +45,25 @@ export class FYPDocument {
 
   @Prop({ trim: true })
   description?: string;
+
+  @Prop({ 
+    type: String, 
+    enum: DocumentStatus, 
+    default: DocumentStatus.PENDING 
+  })
+  status: DocumentStatus;
+
+  @Prop({ trim: true })
+  supervisorFeedback?: string;
+
+  @Prop({ trim: true })
+  rejectionReason?: string;
+
+  @Prop({ type: Date })
+  reviewedAt?: Date;
+
+  @Prop({ type: String, ref: 'Supervisor' })
+  reviewedBy?: string;
 }
 
 export const FYPDocumentSchema = SchemaFactory.createForClass(FYPDocument);

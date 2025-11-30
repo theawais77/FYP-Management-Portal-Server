@@ -84,8 +84,14 @@ export class GroupService {
       throw new ConflictException('Member is already in this group');
     }
 
-    group.members.push(dto.memberId);
-    await group.save();
+    await this.groupModel.findByIdAndUpdate(groupId, {
+      $push: { members: dto.memberId },
+    });
+
+    const updatedGroup = await this.groupModel
+      .findById(groupId)
+      .populate('leader', 'firstName lastName rollNumber')
+      .populate('members', 'firstName lastName rollNumber');
 
     return {
       message: 'Member added successfully',
@@ -114,14 +120,18 @@ export class GroupService {
       throw new BadRequestException('Member is not in this group');
     }
 
-    group.members = group.members.filter((id) => id.toString() !== memberId);
-    await group.save();
+    await this.groupModel.findByIdAndUpdate(groupId, {
+      $pull: { members: memberId },
+    });
+
+    const updatedGroup = await this.groupModel
+      .findById(groupId)
+      .populate('leader', 'firstName lastName rollNumber')
+      .populate('members', 'firstName lastName rollNumber');
 
     return {
       message: 'Member removed successfully',
-      group: await (await group
-          .populate('leader', 'firstName lastName rollNumber'))
-        .populate('members', 'firstName lastName rollNumber'),
+      group: updatedGroup,
     };
   }
 
@@ -140,8 +150,9 @@ export class GroupService {
       throw new BadRequestException('You are not a member of this group');
     }
 
-    group.members = group.members.filter((id) => id.toString() !== studentId);
-    await group.save();
+    await this.groupModel.findByIdAndUpdate(groupId, {
+      $pull: { members: studentId },
+    });
 
     return {
       message: 'Successfully left the group',

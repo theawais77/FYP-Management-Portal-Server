@@ -3,12 +3,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '../common/constants/constants';
 
 export class LoginDto {
-  @ApiProperty({ example: 'john.doe@university.edu' })
+  @ApiProperty({ example: 'coordinator@university.edu' })
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty({ example: 'Password123!' })
+  @ApiProperty({ example: 'Coordinator@123' })
   @IsString()
   @IsNotEmpty()
   password: string;
@@ -95,6 +95,11 @@ export class CreateSupervisorDto {
   @IsString()
   @IsNotEmpty()
   designation: string;
+
+  @ApiProperty({ example: 'Computer Science' })
+  @IsString()
+  @IsNotEmpty()
+  department: string;
 
   @ApiProperty({ example: 'Machine Learning', required: false })
   @IsString()

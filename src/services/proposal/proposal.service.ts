@@ -63,16 +63,19 @@ export class ProposalService {
 
     if (existingProposal) {
       // Update existing proposal
-      existingProposal.fileName = file.originalname;
-      existingProposal.filePath = file.path;
-      existingProposal.fileSize = file.size;
-      existingProposal.uploadedBy = studentId;
-      existingProposal.status = ProposalStatus.DRAFT;
-      await existingProposal.save();
+      await this.proposalModel.findByIdAndUpdate(existingProposal._id, {
+        fileName: file.originalname,
+        filePath: file.path,
+        fileSize: file.size,
+        uploadedBy: studentId,
+        status: ProposalStatus.DRAFT,
+      });
+
+      const updatedProposal = await this.proposalModel.findById(existingProposal._id);
 
       return {
         message: 'Proposal updated successfully',
-        proposal: existingProposal,
+        proposal: updatedProposal,
       };
     }
 
@@ -114,13 +117,16 @@ export class ProposalService {
       throw new BadRequestException('Only draft proposals can be submitted');
     }
 
-    proposal.status = ProposalStatus.SUBMITTED;
-    proposal.submittedAt = new Date();
-    await proposal.save();
+    await this.proposalModel.findByIdAndUpdate(proposalId, {
+      status: ProposalStatus.SUBMITTED,
+      submittedAt: new Date(),
+    });
+
+    const updatedProposal = await this.proposalModel.findById(proposalId);
 
     return {
       message: 'Proposal submitted successfully',
-      proposal,
+      proposal: updatedProposal,
     };
   }
 

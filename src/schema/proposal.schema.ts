@@ -42,6 +42,18 @@ export class Proposal {
 
   @Prop({ trim: true })
   supervisorFeedback?: string;
+
+  @Prop({ trim: true })
+  supervisorComments?: string;
+
+  @Prop({ trim: true })
+  rejectionReason?: string;
+
+  @Prop({ type: Date })
+  reviewedAt?: Date;
+
+  @Prop({ type: String, ref: 'Supervisor' })
+  reviewedBy?: string;
 }
 
 export const ProposalSchema = SchemaFactory.createForClass(Proposal);

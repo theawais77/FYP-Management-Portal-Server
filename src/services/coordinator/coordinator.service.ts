@@ -106,18 +106,18 @@ export class CoordinatorService {
     }
 
     // Assign supervisor to group
-    group.assignedSupervisor = supervisorId;
-    await group.save();
+    await this.groupModel.findByIdAndUpdate(groupId, {
+      assignedSupervisor: supervisorId,
+    });
 
     // Update supervisor's student count
     const groupSize = 1 + (group.members?.length || 0);
-    supervisor.currentStudentCount += groupSize;
+    const newStudentCount = supervisor.currentStudentCount + groupSize;
     
-    if (supervisor.currentStudentCount >= supervisor.maxStudents) {
-      supervisor.isAvailableForSupervision = false;
-    }
-    
-    await supervisor.save();
+    await this.supervisorModel.findByIdAndUpdate(supervisorId, {
+      currentStudentCount: newStudentCount,
+      isAvailableForSupervision: newStudentCount < supervisor.maxStudents,
+    });
 
     // Create or update project
     let project = await this.projectModel.findOne({ group: groupId });
@@ -128,8 +128,9 @@ export class CoordinatorService {
         supervisor: supervisorId,
       });
     } else {
-      project.supervisor = supervisorId;
-      await project.save();
+      await this.projectModel.findByIdAndUpdate(project._id, {
+        supervisor: supervisorId,
+      });
     }
 
     return {
@@ -177,38 +178,40 @@ export class CoordinatorService {
     const oldSupervisor = await this.supervisorModel.findById(oldSupervisorId);
     if (oldSupervisor) {
       const groupSize = 1 + (group.members?.length || 0);
-      oldSupervisor.currentStudentCount = Math.max(0, oldSupervisor.currentStudentCount - groupSize);
+      const newOldCount = Math.max(0, oldSupervisor.currentStudentCount - groupSize);
       
-      if (oldSupervisor.currentStudentCount < oldSupervisor.maxStudents) {
-        oldSupervisor.isAvailableForSupervision = true;
-      }
-      
-      await oldSupervisor.save();
+      await this.supervisorModel.findByIdAndUpdate(oldSupervisorId, {
+        currentStudentCount: newOldCount,
+        isAvailableForSupervision: newOldCount < oldSupervisor.maxStudents,
+      });
     }
 
     // Update new supervisor's count
     const groupSize = 1 + (group.members?.length || 0);
-    newSupervisor.currentStudentCount += groupSize;
+    const newSupervisorCount = newSupervisor.currentStudentCount + groupSize;
     
-    if (newSupervisor.currentStudentCount >= newSupervisor.maxStudents) {
-      newSupervisor.isAvailableForSupervision = false;
-    }
-    
-    await newSupervisor.save();
+    await this.supervisorModel.findByIdAndUpdate(newSupervisorId, {
+      currentStudentCount: newSupervisorCount,
+      isAvailableForSupervision: newSupervisorCount < newSupervisor.maxStudents,
+    });
 
     // Update group
-    group.assignedSupervisor = newSupervisorId;
-    await group.save();
+    await this.groupModel.findByIdAndUpdate(groupId, {
+      assignedSupervisor: newSupervisorId,
+    });
 
     // Update project
-    const project = await this.projectModel.findOne({ group: groupId });
-    if (project) {
-      project.supervisor = newSupervisorId;
-      project.selectedIdea = undefined;
-      project.customIdeaTitle = undefined;
-      project.customIdeaDescription = undefined;
-      await project.save();
-    }
+    await this.projectModel.findOneAndUpdate(
+      { group: groupId },
+      {
+        supervisor: newSupervisorId,
+        $unset: {
+          selectedIdea: '',
+          customIdeaTitle: '',
+          customIdeaDescription: '',
+        },
+      }
+    );
 
     return {
       message: 'Supervisor changed successfully',
@@ -275,17 +278,17 @@ export class CoordinatorService {
           `Cannot set max students below current count (${supervisor.currentStudentCount})`
         );
       }
-      supervisor.maxStudents = dto.maxStudents;
     }
 
-    supervisor.isAvailableForSupervision = dto.isAvailableForSupervision;
+    const maxStudents = dto.maxStudents ?? supervisor.maxStudents;
+    const isAvailable = supervisor.currentStudentCount >= maxStudents 
+      ? false 
+      : dto.isAvailableForSupervision;
 
-    // Auto-disable if at capacity
-    if (supervisor.currentStudentCount >= supervisor.maxStudents) {
-      supervisor.isAvailableForSupervision = false;
-    }
-
-    await supervisor.save();
+    await this.supervisorModel.findByIdAndUpdate(supervisorId, {
+      ...(dto.maxStudents !== undefined && { maxStudents: dto.maxStudents }),
+      isAvailableForSupervision: isAvailable,
+    }, { new: true });
 
     return {
       message: 'Supervisor availability updated successfully',

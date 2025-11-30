@@ -1,6 +1,7 @@
 import {
   Injectable,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -111,9 +112,7 @@ export class UserService {
 
     const [
       totalStudents,
-      activeStudents,
       totalSupervisors,
-      activeSupervisors,
     ] = await Promise.all([
       this.studentModel.countDocuments(query),
       this.studentModel.countDocuments({ ...query }),
@@ -127,6 +126,77 @@ export class UserService {
       },
       supervisors: {
         total: totalSupervisors,
+      },
+    };
+  }
+
+  async deleteUser(userId: string, role: string) {
+    if (!role) {
+      throw new BadRequestException('Role parameter is required');
+    }
+
+    if (role !== UserRole.STUDENT && role !== UserRole.SUPERVISOR) {
+      throw new BadRequestException('Role must be either "student" or "supervisor"');
+    }
+
+    let deletedUser;
+
+    if (role === UserRole.STUDENT) {
+      const student = await this.studentModel.findById(userId);
+
+      if (!student) {
+        throw new NotFoundException('Student not found');
+      }
+
+      const groupModel = this.studentModel.db.model('Group');
+      const isInGroup = await groupModel.findOne({
+        $or: [
+          { leader: userId },
+          { members: userId }
+        ]
+      });
+
+      if (isInGroup) {
+        throw new BadRequestException(
+          'Cannot delete student who is part of a group. Remove from group first.'
+        );
+      }
+
+      deletedUser = await student.deleteOne();
+    } else if (role === UserRole.SUPERVISOR) {
+      const supervisor = await this.supervisorModel.findById(userId);
+
+      if (!supervisor) {
+        throw new NotFoundException('Supervisor not found');
+      }
+
+      // Check if supervisor has assigned students
+      if (supervisor.assignedStudents && supervisor.assignedStudents.length > 0) {
+        throw new BadRequestException(
+          'Cannot delete supervisor with assigned students. Reassign students first.'
+        );
+      }
+
+      // Check if supervisor is assigned to any group
+      const groupModel = this.supervisorModel.db.model('Group');
+      const assignedGroups = await groupModel.findOne({
+        assignedSupervisor: userId
+      });
+
+      if (assignedGroups) {
+        throw new BadRequestException(
+          'Cannot delete supervisor assigned to groups. Reassign groups first.'
+        );
+      }
+
+      deletedUser = await supervisor.deleteOne();
+    }
+
+    return {
+      message: `${role === UserRole.STUDENT ? 'Student' : 'Supervisor'} deleted successfully`,
+      deletedUser: {
+        id: userId,
+        role,
       },
     };
   }

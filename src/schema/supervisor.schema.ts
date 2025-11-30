@@ -20,6 +20,9 @@ export class Supervisor extends BaseUser {
   @Prop({ required: true, trim: true })
   designation: string;
 
+  @Prop({ required: true, trim: true })
+  department: string;
+
   @Prop({ trim: true })
   specialization?: string;
 

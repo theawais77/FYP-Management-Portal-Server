@@ -38,6 +38,56 @@ export class Project {
   @Prop({ trim: true })
   supervisorFeedback?: string;
 
+  @Prop({ trim: true })
+  rejectionReason?: string;
+
+  @Prop({ type: Date })
+  ideaApprovedAt?: Date;
+
+  @Prop({ type: Date })
+  ideaRejectedAt?: Date;
+
+  // GitHub Evaluation
+  @Prop({ trim: true })
+  githubRepositoryUrl?: string;
+
+  @Prop({ type: Number, min: 0, max: 20 })
+  githubMarks?: number;
+
+  @Prop({ trim: true })
+  githubFeedback?: string;
+
+  @Prop({ type: Date })
+  githubEvaluatedAt?: Date;
+
+  // Final Evaluation
+  @Prop({ type: Number, min: 0, max: 100 })
+  totalMarks?: number;
+
+  @Prop({ type: Number, min: 0, max: 20 })
+  proposalMarks?: number;
+
+  @Prop({ type: Number, min: 0, max: 30 })
+  implementationMarks?: number;
+
+  @Prop({ type: Number, min: 0, max: 20 })
+  documentationMarks?: number;
+
+  @Prop({ type: Number, min: 0, max: 15 })
+  presentationMarks?: number;
+
+  @Prop({ type: Number, min: 0, max: 15 })
+  finalGithubMarks?: number;
+
+  @Prop({ trim: true })
+  finalFeedback?: string;
+
+  @Prop({ default: false })
+  isEvaluationComplete: boolean;
+
+  @Prop({ type: Date })
+  evaluationCompletedAt?: Date;
+
   @Prop({ required: true, trim: true })
   department: string;
 }
