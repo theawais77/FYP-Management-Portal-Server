@@ -19,8 +19,8 @@ export class ProjectService {
     @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
   ) {}
 
-  async getSupervisorIdeas(supervisorId: string, studentId: string) {
-    // Verify student's group has this supervisor assigned
+  async getSupervisorIdeas(studentId: string) {
+    // Find student's group and get assigned supervisor
     const group = await this.groupModel.findOne({
       $or: [{ leader: studentId }, { members: studentId }],
     });
@@ -33,23 +33,23 @@ export class ProjectService {
       throw new BadRequestException('No supervisor assigned to your group yet');
     }
 
-    if (group.assignedSupervisor.toString() !== supervisorId) {
-      throw new ForbiddenException('You can only view ideas from your assigned supervisor');
-    }
-
     const ideas = await this.projectIdeaModel
-      .find({ supervisor: supervisorId, isAvailable: true })
+      .find({ supervisor: group.assignedSupervisor, isAvailable: true })
       .populate('supervisor', 'firstName lastName email designation')
       .sort({ createdAt: -1 });
 
-    return ideas;
+    return {
+      message: 'Supervisor ideas retrieved successfully',
+      ideas,
+      supervisor: group.assignedSupervisor,
+    };
   }
 
   async selectIdea(dto: SelectIdeaDto, studentId: string) {
     // Find student's group
     const group = await this.groupModel.findOne({
       $or: [{ leader: studentId }, { members: studentId }],
-    });
+    }).populate('leader', 'department');
 
     if (!group) {
       throw new NotFoundException('You are not part of any group');
@@ -57,13 +57,6 @@ export class ProjectService {
 
     if (!group.assignedSupervisor) {
       throw new BadRequestException('No supervisor assigned to your group yet');
-    }
-
-    // Find project for this group
-    const project = await this.projectModel.findOne({ group: group._id });
-
-    if (!project) {
-      throw new NotFoundException('No project found for your group');
     }
 
     const idea = await this.projectIdeaModel.findById(dto.ideaId);
@@ -80,14 +73,29 @@ export class ProjectService {
       throw new BadRequestException('This idea does not belong to your assigned supervisor');
     }
 
-    await this.projectModel.findByIdAndUpdate(project._id, {
-      selectedIdea: dto.ideaId,
-      $unset: { customIdeaTitle: '', customIdeaDescription: '' },
-      ideaStatus: ProjectStatus.PENDING,
-    });
+    // Find or create project for this group
+    let project = await this.projectModel.findOne({ group: group._id });
+
+    if (!project) {
+      // Create new project if it doesn't exist
+      project = await this.projectModel.create({
+        group: group._id,
+        supervisor: group.assignedSupervisor,
+        selectedIdea: dto.ideaId,
+        ideaStatus: ProjectStatus.PENDING,
+        department: (group.leader as any).department,
+      });
+    } else {
+      // Update existing project
+      await this.projectModel.findByIdAndUpdate(project._id, {
+        selectedIdea: dto.ideaId,
+        $unset: { customIdeaTitle: '', customIdeaDescription: '' },
+        ideaStatus: ProjectStatus.PENDING,
+      });
+    }
 
     const updatedProject = await this.projectModel
-      .findById(project._id)
+      .findOne({ group: group._id })
       .populate('selectedIdea')
       .populate('supervisor', 'firstName lastName email');
 
@@ -101,7 +109,7 @@ export class ProjectService {
     // Find student's group
     const group = await this.groupModel.findOne({
       $or: [{ leader: studentId }, { members: studentId }],
-    });
+    }).populate('leader', 'department');
 
     if (!group) {
       throw new NotFoundException('You are not part of any group');
@@ -111,22 +119,31 @@ export class ProjectService {
       throw new BadRequestException('No supervisor assigned to your group yet');
     }
 
-    // Find project for this group
-    const project = await this.projectModel.findOne({ group: group._id });
+    // Find or create project for this group
+    let project = await this.projectModel.findOne({ group: group._id });
 
     if (!project) {
-      throw new NotFoundException('No project found for your group');
+      // Create new project if it doesn't exist
+      project = await this.projectModel.create({
+        group: group._id,
+        supervisor: group.assignedSupervisor,
+        customIdeaTitle: dto.title,
+        customIdeaDescription: dto.description,
+        ideaStatus: ProjectStatus.PENDING,
+        department: (group.leader as any).department,
+      });
+    } else {
+      // Update existing project
+      await this.projectModel.findByIdAndUpdate(project._id, {
+        customIdeaTitle: dto.title,
+        customIdeaDescription: dto.description,
+        $unset: { selectedIdea: '' },
+        ideaStatus: ProjectStatus.PENDING,
+      });
     }
 
-    await this.projectModel.findByIdAndUpdate(project._id, {
-      customIdeaTitle: dto.title,
-      customIdeaDescription: dto.description,
-      $unset: { selectedIdea: '' },
-      ideaStatus: ProjectStatus.PENDING,
-    });
-
     const updatedProject = await this.projectModel
-      .findById(project._id)
+      .findOne({ group: group._id })
       .populate('supervisor', 'firstName lastName email');
 
     return {
@@ -146,7 +163,10 @@ export class ProjectService {
 
     const project = await this.projectModel
       .findOne({ group: group._id })
-      .populate('group')
+      .populate({
+        path: 'group',
+        select: '-isRegisteredForFYP',
+      })
       .populate('supervisor', 'firstName lastName email designation')
       .populate('selectedIdea');
 

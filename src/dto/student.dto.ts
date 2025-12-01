@@ -1,11 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, IsMongoId } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterFYPDto {
-  @ApiProperty({ example: 'Computer Science' })
-  @IsString()
+  @ApiProperty({ example: '507f1f77bcf86cd799439011', description: 'Department ID' })
+  @IsMongoId()
   @IsNotEmpty()
-  department: string;
+  departmentId: string;
 }
 
 export class CreateGroupDto {

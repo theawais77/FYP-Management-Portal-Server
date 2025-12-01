@@ -19,13 +19,12 @@ import { SelectIdeaDto, RequestCustomIdeaDto } from 'src/dto/student.dto';
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
-  @Get('supervisor/:supervisorId/ideas')
+  @Get('supervisor/ideas')
   @ApiOperation({ summary: 'View assigned supervisor project ideas' })
   async getSupervisorIdeas(
-    @Param('supervisorId') supervisorId: string,
     @CurrentUser('userId') studentId: string,
   ) {
-    return this.projectService.getSupervisorIdeas(supervisorId, studentId);
+    return this.projectService.getSupervisorIdeas(studentId);
   }
 
   @Post('select-idea')

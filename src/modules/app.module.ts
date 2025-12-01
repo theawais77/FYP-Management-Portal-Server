@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth.module';
 import { DepartmentModule } from './department.module';
 import { FacultyModule } from './faculty.module';
@@ -14,6 +15,8 @@ import { CoordinatorModule } from './coordinator.module';
 import { SupervisorModule } from './supervisor.module';
 import { AppController } from 'src/controllers/app.controller';
 import { AppService } from 'src/services/app.service';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @Module({
   imports: [
@@ -35,6 +38,16 @@ import { AppService } from 'src/services/app.service';
     SupervisorModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule {}
