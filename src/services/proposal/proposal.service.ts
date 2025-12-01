@@ -51,9 +51,9 @@ export class ProposalService {
     }
 
     // Check if file is a ZIP
-    if (!file.originalname.toLowerCase().endsWith('.zip')) {
-      throw new BadRequestException('Only ZIP files are allowed');
-    }
+    // if (!file.originalname.toLowerCase().endsWith('.rar')) {
+    //   throw new BadRequestException('Only ZIP files are allowed');
+    // }
 
     // Check if proposal already exists
     const existingProposal = await this.proposalModel.findOne({
@@ -156,9 +156,9 @@ export class ProposalService {
     }
 
     // Check if file is a ZIP
-    if (!file.originalname.toLowerCase().endsWith('.zip')) {
-      throw new BadRequestException('Only ZIP files are allowed');
-    }
+    // if (!file.originalname.toLowerCase().endsWith('.zip')) {
+    //   throw new BadRequestException('Only ZIP files are allowed');
+    // }
 
     const document = await this.documentModel.create({
       project: project._id,

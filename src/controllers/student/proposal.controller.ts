@@ -50,8 +50,8 @@ export class ProposalController {
         },
       }),
       fileFilter: (req, file, cb) => {
-        if (extname(file.originalname).toLowerCase() !== '.zip') {
-          return cb(new BadRequestException('Only ZIP files are allowed'), false);
+        if (extname(file.originalname).toLowerCase() !== '.rar') {
+          return cb(new BadRequestException('Only RAR files are allowed'), false);
         }
         cb(null, true);
       },
@@ -110,8 +110,8 @@ export class ProposalController {
         },
       }),
       fileFilter: (req, file, cb) => {
-        if (extname(file.originalname).toLowerCase() !== '.zip') {
-          return cb(new BadRequestException('Only ZIP files are allowed'), false);
+        if (extname(file.originalname).toLowerCase() !== '.rar') {
+          return cb(new BadRequestException('Only RAR files are allowed'), false);
         }
         cb(null, true);
       },
