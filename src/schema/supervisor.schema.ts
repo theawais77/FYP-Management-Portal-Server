@@ -29,9 +29,6 @@ export class Supervisor extends BaseUser {
   @Prop({ type: [String], default: [] })
   researchInterests?: string[];
 
-  @Prop({ type: [String], ref: 'Student', default: [] })
-  assignedStudents: string[];
-
   @Prop({ required: true, default: 5, min: 0 })
   maxStudents: number;
 
@@ -59,6 +56,12 @@ SupervisorSchema.virtual('fullName').get(function (this: SupervisorDocument) {
 
 SupervisorSchema.virtual('availableSlots').get(function (this: SupervisorDocument) {
   return this.maxStudents - this.currentStudentCount;
+});
+
+SupervisorSchema.virtual('assignedGroups', {
+  ref: 'Group',
+  localField: '_id',
+  foreignField: 'assignedSupervisor',
 });
 
 SupervisorSchema.set('toJSON', { virtuals: true });

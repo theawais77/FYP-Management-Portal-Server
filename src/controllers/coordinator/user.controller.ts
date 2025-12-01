@@ -27,7 +27,7 @@ export class UserController {
   @ApiQuery({ name: 'department', required: false, example: 'Computer Science' })
   @ApiQuery({ name: 'semester', required: false, example: '8' })
   @ApiQuery({ name: 'isActive', required: false, type: Boolean })
-  @ApiQuery({ name: 'search', required: false, example: 'john' })
+  @ApiQuery({ name: 'search', required: false, example: 'bilal' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   async getAllUsers(@Query() query: GetUsersQueryDto) {
@@ -42,6 +42,19 @@ export class UserController {
   @ApiQuery({ name: 'department', required: false })
   async getUsersSummary(@Query('department') department?: string) {
     return this.userService.getUsersSummary(department);
+  }
+
+  @Get(':userId')
+  @ApiOperation({ 
+    summary: 'Get user by ID with complete information',
+    description: 'Fetch complete details of a student or supervisor by ID'
+  })
+  @ApiQuery({ name: 'role', enum: UserRole, required: true, description: 'student or supervisor' })
+  async getUserById(
+    @Param('userId') userId: string,
+    @Query('role') role: string,
+  ) {
+    return this.userService.getUserById(userId, role);
   }
 
   @Delete(':userId')

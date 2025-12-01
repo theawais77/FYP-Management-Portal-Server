@@ -233,7 +233,14 @@ export class CoordinatorService {
 
     const supervisors = await this.supervisorModel
       .find(query)
-      .populate('assignedStudents', 'firstName lastName email rollNumber')
+      .populate({
+        path: 'assignedGroups',
+        populate: [
+          { path: 'leader', select: 'firstName lastName email rollNumber' },
+          { path: 'members', select: 'firstName lastName email rollNumber' }
+        ]
+      })
+      .select('-assignedStudents')
       .sort({ firstName: 1 });
 
     return supervisors.map(supervisor => ({

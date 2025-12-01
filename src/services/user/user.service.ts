@@ -84,8 +84,7 @@ export class UserService {
       [users, total] = await Promise.all([
         this.supervisorModel
           .find(baseQuery)
-          .populate('assignedStudents', 'firstName lastName email rollNumber')
-          .select('-password')
+          .select('_id firstName lastName email employeeId designation officeLocation officeHours')
           .skip(skip)
           .limit(limit)
           .sort({ createdAt: -1 }),
@@ -102,6 +101,46 @@ export class UserService {
         pages: Math.ceil(total / limit),
       },
     };
+  }
+
+  async getUserById(userId: string, role: string) {
+    if (!role) {
+      throw new BadRequestException('Role parameter is required');
+    }
+
+    if (role !== UserRole.STUDENT && role !== UserRole.SUPERVISOR) {
+      throw new BadRequestException('Role must be either "student" or "supervisor"');
+    }
+
+    let user: any;
+
+    if (role === UserRole.STUDENT) {
+      user = await this.studentModel
+        .findById(userId)
+        .populate('assignedSupervisor', 'firstName lastName email designation specialization')
+        .select('-password');
+
+      if (!user) {
+        throw new NotFoundException('Student not found');
+      }
+    } else if (role === UserRole.SUPERVISOR) {
+      user = await this.supervisorModel
+        .findById(userId)
+        .populate({
+          path: 'assignedGroups',
+          populate: [
+            { path: 'leader', select: 'firstName lastName email rollNumber' },
+            { path: 'members', select: 'firstName lastName email rollNumber' }
+          ]
+        })
+        .select('-password -assignedStudents');
+
+      if (!user) {
+        throw new NotFoundException('Supervisor not found');
+      }
+    }
+
+    return user;
   }
 
   async getUsersSummary(department?: string) {
@@ -168,13 +207,6 @@ export class UserService {
 
       if (!supervisor) {
         throw new NotFoundException('Supervisor not found');
-      }
-
-      // Check if supervisor has assigned students
-      if (supervisor.assignedStudents && supervisor.assignedStudents.length > 0) {
-        throw new BadRequestException(
-          'Cannot delete supervisor with assigned students. Reassign students first.'
-        );
       }
 
       // Check if supervisor is assigned to any group

@@ -118,7 +118,14 @@ export class SupervisorAuthService {
   async getProfile(userId: string) {
     const supervisor = await this.supervisorModel
       .findById(userId)
-      .populate('assignedStudents');
+      .populate({
+        path: 'assignedGroups',
+        populate: [
+          { path: 'leader', select: 'firstName lastName email rollNumber' },
+          { path: 'members', select: 'firstName lastName email rollNumber' }
+        ]
+      })
+      .select('-assignedStudents');
 
     if (!supervisor) {
       throw new UnauthorizedException('Supervisor not found');

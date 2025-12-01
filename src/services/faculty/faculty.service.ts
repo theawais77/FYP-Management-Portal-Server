@@ -38,7 +38,14 @@ export class FacultyService {
 
     const faculty = await this.supervisorModel
       .find(query)
-      .populate('assignedStudents', 'firstName lastName email rollNumber')
+      .populate({
+        path: 'assignedGroups',
+        populate: [
+          { path: 'leader', select: 'firstName lastName email rollNumber' },
+          { path: 'members', select: 'firstName lastName email rollNumber' }
+        ]
+      })
+      .select('-assignedStudents')
       .sort({ firstName: 1 });
 
     return {
@@ -105,10 +112,15 @@ export class FacultyService {
       throw new BadRequestException('Supervisor is not assigned to this department');
     }
 
-    // Check if supervisor has assigned students
-    if (supervisor.assignedStudents && supervisor.assignedStudents.length > 0) {
+    // Check if supervisor has assigned groups
+    const groupModel = this.supervisorModel.db.model('Group');
+    const assignedGroups = await groupModel.findOne({
+      assignedSupervisor: supervisorId
+    });
+
+    if (assignedGroups) {
       throw new BadRequestException(
-        'Cannot remove faculty member with assigned students. Please reassign students first.'
+        'Cannot remove faculty member with assigned groups. Please reassign groups first.'
       );
     }
 
@@ -137,7 +149,14 @@ export class FacultyService {
 
     const supervisor = await this.supervisorModel
       .findById(facultyId)
-      .populate('assignedStudents', 'firstName lastName email rollNumber department semester');
+      .populate({
+        path: 'assignedGroups',
+        populate: [
+          { path: 'leader', select: 'firstName lastName email rollNumber department semester' },
+          { path: 'members', select: 'firstName lastName email rollNumber department semester' }
+        ]
+      })
+      .select('-assignedStudents');
 
     if (!supervisor) {
       throw new NotFoundException('Supervisor not found');
