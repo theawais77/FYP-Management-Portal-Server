@@ -91,13 +91,12 @@ export class GroupService {
     const updatedGroup = await this.groupModel
       .findById(groupId)
       .populate('leader', 'firstName lastName rollNumber')
-      .populate('members', 'firstName lastName rollNumber');
+      .populate('members', 'firstName lastName rollNumber')
+      .select('-isRegisteredForFYP');
 
     return {
       message: 'Member added successfully',
-      group: await (await group
-          .populate('leader', 'firstName lastName rollNumber'))
-        .populate('members', 'firstName lastName rollNumber'),
+      group: updatedGroup,
     };
   }
 
@@ -127,7 +126,8 @@ export class GroupService {
     const updatedGroup = await this.groupModel
       .findById(groupId)
       .populate('leader', 'firstName lastName rollNumber')
-      .populate('members', 'firstName lastName rollNumber');
+      .populate('members', 'firstName lastName rollNumber')
+      .select('-isRegisteredForFYP');
 
     return {
       message: 'Member removed successfully',
@@ -167,7 +167,8 @@ export class GroupService {
       .populate('leader', 'firstName lastName rollNumber email')
       .populate('members', 'firstName lastName rollNumber email')
       .populate('assignedSupervisor', 'firstName lastName email designation')
-      .populate('project');
+      .populate('project')
+      .select('-isRegisteredForFYP');
 
     if (!group) {
       throw new NotFoundException('You are not part of any group');

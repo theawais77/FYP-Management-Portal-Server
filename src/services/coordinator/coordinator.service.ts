@@ -32,6 +32,7 @@ export class CoordinatorService {
       .populate('leader', 'firstName lastName email rollNumber')
       .populate('members', 'firstName lastName email rollNumber')
       .populate('assignedSupervisor', 'firstName lastName email designation')
+      .select('-isRegisteredForFYP')
       .sort({ createdAt: -1 });
 
     return groups;
@@ -42,7 +43,8 @@ export class CoordinatorService {
       .findById(groupId)
       .populate('leader', 'firstName lastName email rollNumber department')
       .populate('members', 'firstName lastName email rollNumber department')
-      .populate('assignedSupervisor', 'firstName lastName email designation specialization');
+      .populate('assignedSupervisor', 'firstName lastName email designation specialization')
+      .select('-isRegisteredForFYP');
 
     if (!group) {
       throw new NotFoundException('Group not found');
@@ -71,6 +73,7 @@ export class CoordinatorService {
       .find(query)
       .populate('leader', 'firstName lastName email rollNumber')
       .populate('members', 'firstName lastName email rollNumber')
+      .select('-isRegisteredForFYP')
       .sort({ createdAt: -1 });
 
     return {

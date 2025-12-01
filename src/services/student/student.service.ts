@@ -67,7 +67,8 @@ export class StudentService {
       })
       .populate('leader', 'firstName lastName rollNumber')
       .populate('members', 'firstName lastName rollNumber')
-      .populate('assignedSupervisor', 'firstName lastName email designation');
+      .populate('assignedSupervisor', 'firstName lastName email designation')
+      .select('-isRegisteredForFYP');
 
     return {
       student: student.toObject(),
