@@ -4,10 +4,10 @@ import { Group, GroupSchema } from '../schema/group.schema';
 import { Supervisor, SupervisorSchema } from '../schema/supervisor.schema';
 import { Project, ProjectSchema } from '../schema/project.schema';
 import { Proposal, ProposalSchema } from '../schema/proposal.schema';
-import { CoordinatorGroupController } from '../controllers/coordinator-group.controller';
-import { CoordinatorSupervisorController } from '../controllers/coordinator-project.controller';
-import { CoordinatorProjectMonitorController } from '../controllers/coordinator-monitor.controller';
-import { CoordinatorProposalMonitorController } from '../controllers/coordinator-proposal.controller';
+import { CoordinatorGroupController } from '../controllers/coordinator/coordinator-group.controller';
+import { CoordinatorSupervisorController } from '../controllers/coordinator/coordinator-project.controller';
+import { CoordinatorProjectMonitorController } from '../controllers/coordinator/coordinator-monitor.controller';
+import { CoordinatorProposalMonitorController } from '../controllers/coordinator/coordinator-proposal.controller';
 import { CoordinatorService } from '../services/coordinator/coordinator.service';
 
 @Module({

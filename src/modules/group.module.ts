@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Group, GroupSchema } from '../schema/group.schema';
 import { Student, StudentSchema } from '../schema/student.schema';
-import { GroupController } from '../controllers/group.controller';
+import { GroupController } from '../controllers/student/group.controller';
 import { GroupService } from '../services/group/group.service';
 
 @Module({

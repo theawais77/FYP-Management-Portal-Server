@@ -8,9 +8,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '../common/constants/constants';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UserRole } from '../../common/constants/constants';
 import { GroupService } from 'src/services/group/group.service';
 import { CreateGroupDto, AddMemberDto } from 'src/dto/student.dto';
 

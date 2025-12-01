@@ -7,8 +7,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '../common/constants/constants';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../../common/constants/constants';
 import { CoordinatorService } from 'src/services/coordinator/coordinator.service';
 import { UpdateSupervisorAvailabilityDto } from 'src/dto/coordinator.dto';
 

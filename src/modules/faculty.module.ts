@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { FacultyController, FacultyManagementController } from '../controllers/faculty.controller';
+import { FacultyController, FacultyManagementController } from '../controllers/coordinator/faculty.controller';
 import { FacultyService } from 'src/services/faculty/faculty.service';
 import { Department, DepartmentSchema } from '../schema/department.schema';
 import { Supervisor, SupervisorSchema } from '../schema/supervisor.schema';

@@ -9,10 +9,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { CreateAnnouncementDto, UpdateAnnouncementDto } from '../dto/announcement.dto';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '../common/constants/constants';
+import { CreateAnnouncementDto, UpdateAnnouncementDto } from '../../dto/announcement.dto';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UserRole } from '../../common/constants/constants';
 import { AnnouncementService } from 'src/services/announcement/announcement.service';
 
 @ApiTags('Coordinator - Announcements')

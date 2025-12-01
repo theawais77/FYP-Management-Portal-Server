@@ -8,7 +8,7 @@ import { LoginDto } from 'src/dto/auth.dto';
 import { CoordinatorAuthService } from 'src/services/auth/coordinator-auth.service';
 
 
-@ApiTags('Coordinator - Auth')
+@ApiTags('Coordinator Auth')
 @Controller('auth/coordinator')
 export class CoordinatorAuthController {
   constructor(private coordinatorAuthService: CoordinatorAuthService) {}

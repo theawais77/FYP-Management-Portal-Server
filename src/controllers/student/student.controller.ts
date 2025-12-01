@@ -5,9 +5,9 @@ import {
   Body,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '../common/constants/constants';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UserRole } from '../../common/constants/constants';
 import { StudentService } from 'src/services/student/student.service';
 import { RegisterFYPDto } from 'src/dto/student.dto';
 

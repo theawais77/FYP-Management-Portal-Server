@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DepartmentController } from 'src/controllers/department.controller';
+import { DepartmentController } from 'src/controllers/coordinator/department.controller';
 import { Department, DepartmentSchema } from 'src/schema/department.schema';
 import { Student, StudentSchema } from 'src/schema/student.schema';
 import { Supervisor, SupervisorSchema } from 'src/schema/supervisor.schema';

@@ -11,9 +11,9 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '../common/constants/constants';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UserRole } from '../../common/constants/constants';
 import { ProposalService } from 'src/services/proposal/proposal.service';
 import { UploadDocumentDto } from 'src/dto/student.dto';
 import { diskStorage } from 'multer';

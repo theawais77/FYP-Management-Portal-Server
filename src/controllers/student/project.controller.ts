@@ -6,9 +6,9 @@ import {
   Param,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '../common/constants/constants';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UserRole } from '../../common/constants/constants';
 import { ProjectService } from 'src/services/project/project.service';
 import { SelectIdeaDto, RequestCustomIdeaDto } from 'src/dto/student.dto';
 
@@ -28,14 +28,13 @@ export class ProjectController {
     return this.projectService.getSupervisorIdeas(supervisorId, studentId);
   }
 
-  @Post(':projectId/select-idea')
+  @Post('select-idea')
   @ApiOperation({ summary: 'Select project idea from supervisor list' })
   async selectIdea(
-    @Param('projectId') projectId: string,
     @Body() dto: SelectIdeaDto,
     @CurrentUser('userId') studentId: string,
   ) {
-    return this.projectService.selectIdea(projectId, dto, studentId);
+    return this.projectService.selectIdea(dto, studentId);
   }
 
   @Post('request-custom-idea')

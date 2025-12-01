@@ -10,10 +10,10 @@ import {
   Param,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateDepartmentDto, UpdateDepartmentDto } from '../dto/department.dto';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '../common/constants/constants';
+import { CreateDepartmentDto, UpdateDepartmentDto } from '../../dto/department.dto';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UserRole } from '../../common/constants/constants';
 import { DepartmentService } from 'src/services/department/department.service';
 
 @ApiTags('Coordinator - Departments')

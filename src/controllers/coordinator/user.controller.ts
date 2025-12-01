@@ -6,8 +6,8 @@ import {
   Param,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '../common/constants/constants';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../../common/constants/constants';
 import { GetUsersQueryDto } from 'src/dto/user.dto';
 import { UserService } from 'src/services/user/user.service';
 

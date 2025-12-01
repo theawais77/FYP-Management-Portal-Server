@@ -126,6 +126,7 @@ export class CoordinatorService {
       project = await this.projectModel.create({
         group: groupId,
         supervisor: supervisorId,
+        department: group.department,
       });
     } else {
       await this.projectModel.findByIdAndUpdate(project._id, {

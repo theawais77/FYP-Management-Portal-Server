@@ -4,7 +4,7 @@ import { Proposal, ProposalSchema } from '../schema/proposal.schema';
 import { FYPDocument, FYPDocumentSchema } from '../schema/document.schema';
 import { Project, ProjectSchema } from '../schema/project.schema';
 import { Group, GroupSchema } from '../schema/group.schema';
-import { ProposalController } from '../controllers/proposal.controller';
+import { ProposalController } from '../controllers/student/proposal.controller';
 import { ProposalService } from '../services/proposal/proposal.service';
 
 @Module({

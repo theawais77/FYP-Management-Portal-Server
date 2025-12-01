@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
 import { AuthModule } from './auth.module';
 import { DepartmentModule } from './department.module';
 import { FacultyModule } from './faculty.module';
@@ -15,6 +12,8 @@ import { ProjectModule } from './project.module';
 import { ProposalModule } from './proposal.module';
 import { CoordinatorModule } from './coordinator.module';
 import { SupervisorModule } from './supervisor.module';
+import { AppController } from 'src/controllers/app.controller';
+import { AppService } from 'src/services/app.service';
 
 @Module({
   imports: [
@@ -35,17 +34,7 @@ import { SupervisorModule } from './supervisor.module';
     CoordinatorModule,
     SupervisorModule,
   ],
-  // controllers: [AppController],
-  providers: [
-    // AppService
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
-  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

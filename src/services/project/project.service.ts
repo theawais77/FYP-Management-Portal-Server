@@ -45,21 +45,25 @@ export class ProjectService {
     return ideas;
   }
 
-  async selectIdea(projectId: string, dto: SelectIdeaDto, studentId: string) {
-    const project = await this.projectModel.findById(projectId).populate('group');
+  async selectIdea(dto: SelectIdeaDto, studentId: string) {
+    // Find student's group
+    const group = await this.groupModel.findOne({
+      $or: [{ leader: studentId }, { members: studentId }],
+    });
 
-    if (!project) {
-      throw new NotFoundException('Project not found');
+    if (!group) {
+      throw new NotFoundException('You are not part of any group');
     }
 
-    const group = project.group as any;
+    if (!group.assignedSupervisor) {
+      throw new BadRequestException('No supervisor assigned to your group yet');
+    }
 
-    // Verify student is part of the project's group
-    if (
-      group.leader.toString() !== studentId &&
-      !group.members.includes(studentId)
-    ) {
-      throw new ForbiddenException('You are not part of this project group');
+    // Find project for this group
+    const project = await this.projectModel.findOne({ group: group._id });
+
+    if (!project) {
+      throw new NotFoundException('No project found for your group');
     }
 
     const idea = await this.projectIdeaModel.findById(dto.ideaId);
@@ -72,7 +76,7 @@ export class ProjectService {
       throw new BadRequestException('This project idea is no longer available');
     }
 
-    if (idea.supervisor.toString() !== project.supervisor.toString()) {
+    if (idea.supervisor.toString() !== group.assignedSupervisor.toString()) {
       throw new BadRequestException('This idea does not belong to your assigned supervisor');
     }
 

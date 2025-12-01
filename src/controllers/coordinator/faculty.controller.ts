@@ -9,9 +9,9 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { AddFacultyDto } from '../dto/department.dto';
-import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '../common/constants/constants';
+import { AddFacultyDto } from '../../dto/department.dto';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../../common/constants/constants';
 import { FacultyService } from 'src/services/faculty/faculty.service';
 
 @ApiTags('Coordinator - Faculty Management')
