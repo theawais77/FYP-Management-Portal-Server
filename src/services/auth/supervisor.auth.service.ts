@@ -120,6 +120,7 @@ export class SupervisorAuthService {
       .findById(userId)
       .populate({
         path: 'assignedGroups',
+        select: '-isRegisteredForFYP',
         populate: [
           { path: 'leader', select: 'firstName lastName email rollNumber' },
           { path: 'members', select: 'firstName lastName email rollNumber' }

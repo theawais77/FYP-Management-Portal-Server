@@ -18,9 +18,9 @@ export class CoordinatorProposalMonitorController {
 
   @Get()
   @ApiOperation({ summary: 'View all proposals' })
-  @ApiQuery({ name: 'department', required: false, type: String })
-  async getAllProposals(@Query('department') department?: string) {
-    return this.coordinatorService.getAllProposals(department);
+  @ApiQuery({ name: 'departmentId', required: false, type: String })
+  async getAllProposals(@Query('departmentId') departmentId?: string) {
+    return this.coordinatorService.getAllProposals(departmentId);
   }
 
   @Get(':id')

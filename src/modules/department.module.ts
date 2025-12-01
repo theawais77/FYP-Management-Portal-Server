@@ -4,6 +4,7 @@ import { DepartmentController } from 'src/controllers/coordinator/department.con
 import { Department, DepartmentSchema } from 'src/schema/department.schema';
 import { Student, StudentSchema } from 'src/schema/student.schema';
 import { Supervisor, SupervisorSchema } from 'src/schema/supervisor.schema';
+import { Group, GroupSchema } from 'src/schema/group.schema';
 import { DepartmentService } from 'src/services/department/department.service';
 
 @Module({
@@ -12,6 +13,7 @@ import { DepartmentService } from 'src/services/department/department.service';
       { name: Department.name, schema: DepartmentSchema },
       { name: Supervisor.name, schema: SupervisorSchema },
       { name: Student.name, schema: StudentSchema },
+      { name: Group.name, schema: GroupSchema },
     ]),
   ],
   controllers: [DepartmentController],

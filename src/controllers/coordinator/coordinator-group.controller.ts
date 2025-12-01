@@ -19,16 +19,16 @@ export class CoordinatorGroupController {
 
   @Get()
   @ApiOperation({ summary: 'View all groups' })
-  @ApiQuery({ name: 'department', required: false, type: String })
-  async getAllGroups(@Query('department') department?: string) {
-    return this.coordinatorService.getAllGroups(department);
+  @ApiQuery({ name: 'departmentId', required: false, type: String })
+  async getAllGroups(@Query('departmentId') departmentId?: string) {
+    return this.coordinatorService.getAllGroups(departmentId);
   }
 
   @Get('without-supervisor')
   @ApiOperation({ summary: 'Get groups without assigned supervisor' })
-  @ApiQuery({ name: 'department', required: false, type: String })
-  async getGroupsWithoutSupervisor(@Query('department') department?: string) {
-    return this.coordinatorService.getGroupsWithoutSupervisor(department);
+  @ApiQuery({ name: 'departmentId', required: false, type: String })
+  async getGroupsWithoutSupervisor(@Query('departmentId') departmentId?: string) {
+    return this.coordinatorService.getGroupsWithoutSupervisor(departmentId);
   }
 
   @Get(':id')

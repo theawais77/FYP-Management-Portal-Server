@@ -21,16 +21,16 @@ export class CoordinatorSupervisorController {
 
   @Get()
   @ApiOperation({ summary: 'Get all supervisors with their slots' })
-  @ApiQuery({ name: 'department', required: false, type: String })
-  async getAllSupervisors(@Query('department') department?: string) {
-    return this.coordinatorService.getAllSupervisors(department);
+  @ApiQuery({ name: 'departmentId', required: false, type: String })
+  async getAllSupervisors(@Query('departmentId') departmentId?: string) {
+    return this.coordinatorService.getAllSupervisors(departmentId);
   }
 
   @Get('availability')
   @ApiOperation({ summary: 'Get supervisor availability status' })
-  @ApiQuery({ name: 'department', required: false, type: String })
-  async getSupervisorAvailability(@Query('department') department?: string) {
-    return this.coordinatorService.getSupervisorAvailability(department);
+  @ApiQuery({ name: 'departmentId', required: false, type: String })
+  async getSupervisorAvailability(@Query('departmentId') departmentId?: string) {
+    return this.coordinatorService.getSupervisorAvailability(departmentId);
   }
 
   @Put(':id/availability')

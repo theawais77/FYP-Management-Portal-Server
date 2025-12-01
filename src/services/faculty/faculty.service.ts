@@ -40,6 +40,7 @@ export class FacultyService {
       .find(query)
       .populate({
         path: 'assignedGroups',
+        select: '-isRegisteredForFYP',
         populate: [
           { path: 'leader', select: 'firstName lastName email rollNumber' },
           { path: 'members', select: 'firstName lastName email rollNumber' }
@@ -151,6 +152,7 @@ export class FacultyService {
       .findById(facultyId)
       .populate({
         path: 'assignedGroups',
+        select: '-isRegisteredForFYP',
         populate: [
           { path: 'leader', select: 'firstName lastName email rollNumber department semester' },
           { path: 'members', select: 'firstName lastName email rollNumber department semester' }

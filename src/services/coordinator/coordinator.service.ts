@@ -9,6 +9,7 @@ import { Group, GroupDocument } from 'src/schema/group.schema';
 import { Supervisor, SupervisorDocument } from 'src/schema/supervisor.schema';
 import { Project, ProjectDocument } from 'src/schema/project.schema';
 import { Proposal, ProposalDocument } from 'src/schema/proposal.schema';
+import { Department, DepartmentDocument } from 'src/schema/department.schema';
 import { UpdateSupervisorAvailabilityDto } from 'src/dto/coordinator.dto';
 
 @Injectable()
@@ -18,20 +19,24 @@ export class CoordinatorService {
     @InjectModel(Supervisor.name) private supervisorModel: Model<SupervisorDocument>,
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
     @InjectModel(Proposal.name) private proposalModel: Model<ProposalDocument>,
+    @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>,
   ) {}
 
-  async getAllGroups(department?: string) {
+  async getAllGroups(departmentId?: string) {
     const query: any = {};
     
-    if (department) {
-      query.department = department;
+    if (departmentId) {
+      const department = await this.departmentModel.findById(departmentId);
+      if (department) {
+        query.department = department.name;
+      }
     }
 
     const groups = await this.groupModel
       .find(query)
       .populate('leader', 'firstName lastName email rollNumber')
       .populate('members', 'firstName lastName email rollNumber')
-      .populate('assignedSupervisor', 'firstName lastName email designation')
+      .populate('assignedSupervisor', 'firstName lastName email designation maxStudents currentStudentCount')
       .select('-isRegisteredForFYP')
       .sort({ createdAt: -1 });
 
@@ -43,7 +48,7 @@ export class CoordinatorService {
       .findById(groupId)
       .populate('leader', 'firstName lastName email rollNumber department')
       .populate('members', 'firstName lastName email rollNumber department')
-      .populate('assignedSupervisor', 'firstName lastName email designation specialization')
+      .populate('assignedSupervisor', 'firstName lastName email designation specialization maxStudents currentStudentCount')
       .select('-isRegisteredForFYP');
 
     if (!group) {
@@ -62,11 +67,14 @@ export class CoordinatorService {
     };
   }
 
-  async getGroupsWithoutSupervisor(department?: string) {
+  async getGroupsWithoutSupervisor(departmentId?: string) {
     const query: any = { assignedSupervisor: null };
     
-    if (department) {
-      query.department = department;
+    if (departmentId) {
+      const department = await this.departmentModel.findById(departmentId);
+      if (department) {
+        query.department = department.name;
+      }
     }
 
     const groups = await this.groupModel
@@ -227,17 +235,21 @@ export class CoordinatorService {
   }
 
 
-  async getAllSupervisors(department?: string) {
+  async getAllSupervisors(departmentId?: string) {
     const query: any = {};
     
-    if (department) {
-      query.department = department;
+    if (departmentId) {
+      const department = await this.departmentModel.findById(departmentId);
+      if (department) {
+        query.department = department.name;
+      }
     }
 
     const supervisors = await this.supervisorModel
       .find(query)
       .populate({
         path: 'assignedGroups',
+        select: '-isRegisteredForFYP',
         populate: [
           { path: 'leader', select: 'firstName lastName email rollNumber' },
           { path: 'members', select: 'firstName lastName email rollNumber' }
@@ -252,11 +264,14 @@ export class CoordinatorService {
     }));
   }
 
-  async getSupervisorAvailability(department?: string) {
+  async getSupervisorAvailability(departmentId?: string) {
     const query: any = {};
     
-    if (department) {
-      query.department = department;
+    if (departmentId) {
+      const department = await this.departmentModel.findById(departmentId);
+      if (department) {
+        query.department = department.name;
+      }
     }
 
     const supervisors = await this.supervisorModel
@@ -315,8 +330,16 @@ export class CoordinatorService {
     };
   }
 
-  async getAllProjects(department?: string) {
+  async getAllProjects(departmentId?: string) {
     const query: any = {};
+
+    let departmentName: string | undefined;
+    if (departmentId) {
+      const department = await this.departmentModel.findById(departmentId);
+      if (department) {
+        departmentName = department.name;
+      }
+    }
 
     const projects = await this.projectModel
       .find(query)
@@ -332,8 +355,8 @@ export class CoordinatorService {
       .sort({ createdAt: -1 });
 
     // Filter by department if provided
-    const filteredProjects = department
-      ? projects.filter((p: any) => p.group?.department === department)
+    const filteredProjects = departmentName
+      ? projects.filter((p: any) => p.group?.department === departmentName)
       : projects;
 
     return filteredProjects;
@@ -367,7 +390,15 @@ export class CoordinatorService {
     };
   }
 
-  async getAllProposals(department?: string) {
+  async getAllProposals(departmentId?: string) {
+    let departmentName: string | undefined;
+    if (departmentId) {
+      const department = await this.departmentModel.findById(departmentId);
+      if (department) {
+        departmentName = department.name;
+      }
+    }
+
     const proposals = await this.proposalModel
       .find()
       .populate({
@@ -386,8 +417,8 @@ export class CoordinatorService {
       .sort({ submittedAt: -1 });
 
     // Filter by department if provided
-    const filteredProposals = department
-      ? proposals.filter((p: any) => p.project?.group?.department === department)
+    const filteredProposals = departmentName
+      ? proposals.filter((p: any) => p.project?.group?.department === departmentName)
       : proposals;
 
     return filteredProposals;

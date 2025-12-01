@@ -10,6 +10,7 @@ import { CreateDepartmentDto, UpdateDepartmentDto } from 'src/dto/department.dto
 import { Department, DepartmentDocument } from 'src/schema/department.schema';
 import { Student, StudentDocument } from 'src/schema/student.schema';
 import { Supervisor, SupervisorDocument } from 'src/schema/supervisor.schema';
+import { Group, GroupDocument } from 'src/schema/group.schema';
 
 @Injectable()
 export class DepartmentService {
@@ -17,6 +18,7 @@ export class DepartmentService {
     @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>,
     @InjectModel(Supervisor.name) private supervisorModel: Model<SupervisorDocument>,
     @InjectModel(Student.name) private studentModel: Model<StudentDocument>,
+    @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
   ) {}
 
   async create(dto: CreateDepartmentDto, coordinatorId: string) {
@@ -75,7 +77,7 @@ export class DepartmentService {
   async findOne(id: string) {
     const department = await this.departmentModel
       .findById(id)
-      .populate('facultyList', 'firstName lastName email designation specialization');
+      .populate('facultyList', 'firstName lastName email designation specialization maxStudents currentStudentCount');
 
     if (!department) {
       throw new NotFoundException('Department not found');
@@ -179,10 +181,20 @@ export class DepartmentService {
       }),
     ]);
 
-    const studentsWithSupervisor = await this.studentModel.countDocuments({
-      department: department.name,
-      assignedSupervisor: { $exists: true, $ne: null },
-    });
+    // Count groups with and without supervisors
+    const [groupsWithSupervisor, groupsWithoutSupervisor] = await Promise.all([
+      this.groupModel.countDocuments({
+        department: department.name,
+        assignedSupervisor: { $exists: true, $ne: null },
+      }),
+      this.groupModel.countDocuments({
+        department: department.name,
+        $or: [
+          { assignedSupervisor: { $exists: false } },
+          { assignedSupervisor: null }
+        ],
+      }),
+    ]);
 
     return {
       departmentName: department.name,
@@ -190,8 +202,8 @@ export class DepartmentService {
       totalFaculty,
       totalStudents,
       availableFaculty,
-      studentsWithSupervisor,
-      studentsWithoutSupervisor: totalStudents - studentsWithSupervisor,
+      groupsWithSupervisor,
+      groupsWithoutSupervisor,
     };
   }
 }

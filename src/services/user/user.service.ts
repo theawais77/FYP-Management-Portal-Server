@@ -84,7 +84,7 @@ export class UserService {
       [users, total] = await Promise.all([
         this.supervisorModel
           .find(baseQuery)
-          .select('_id firstName lastName email employeeId designation officeLocation officeHours')
+          .select('_id firstName lastName email employeeId designation officeLocation officeHours maxStudents currentStudentCount')
           .skip(skip)
           .limit(limit)
           .sort({ createdAt: -1 }),
@@ -128,6 +128,7 @@ export class UserService {
         .findById(userId)
         .populate({
           path: 'assignedGroups',
+          select: '-isRegisteredForFYP',
           populate: [
             { path: 'leader', select: 'firstName lastName email rollNumber' },
             { path: 'members', select: 'firstName lastName email rollNumber' }
@@ -154,9 +155,7 @@ export class UserService {
       totalSupervisors,
     ] = await Promise.all([
       this.studentModel.countDocuments(query),
-      this.studentModel.countDocuments({ ...query }),
       this.supervisorModel.countDocuments(query),
-      this.supervisorModel.countDocuments({ ...query }),
     ]);
 
     return {
