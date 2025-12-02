@@ -9,7 +9,7 @@ import { Model } from 'mongoose';
 import { Project, ProjectDocument, ProjectStatus } from 'src/schema/project.schema';
 import { ProjectIdea, ProjectIdeaDocument } from 'src/schema/project-idea.schema';
 import { Group, GroupDocument } from 'src/schema/group.schema';
-import { SelectIdeaDto, RequestCustomIdeaDto } from 'src/dto/student.dto';
+import { SelectIdeaDto, RequestCustomIdeaDto, SubmitGithubDto } from 'src/dto/student.dto';
 
 @Injectable()
 export class ProjectService {
@@ -175,5 +175,78 @@ export class ProjectService {
     }
 
     return project;
+  }
+
+  async submitGithub(dto: SubmitGithubDto, studentId: string) {
+    const group = await this.groupModel.findOne({
+      $or: [{ leader: studentId }, { members: studentId }],
+    });
+
+    if (!group) {
+      throw new NotFoundException('You are not part of any group');
+    }
+
+    const project = await this.projectModel.findOne({ group: group._id });
+
+    if (!project) {
+      throw new NotFoundException('No project found for your group');
+    }
+
+    // Validate GitHub URL format
+    const githubUrlPattern = /^https?:\/\/(www\.)?github\.com\/[\w-]+\/[\w.-]+\/?$/;
+    if (!githubUrlPattern.test(dto.githubRepositoryUrl)) {
+      throw new BadRequestException('Invalid GitHub repository URL format');
+    }
+
+    await this.projectModel.findByIdAndUpdate(project._id, {
+      githubRepositoryUrl: dto.githubRepositoryUrl,
+    });
+
+    const updatedProject = await this.projectModel
+      .findById(project._id)
+      .select('githubRepositoryUrl group')
+      .populate('group', 'name');
+
+    return {
+      message: 'GitHub repository URL submitted successfully',
+      project: updatedProject,
+    };
+  }
+
+  async getMyGithub(studentId: string) {
+    const group = await this.groupModel.findOne({
+      $or: [{ leader: studentId }, { members: studentId }],
+    });
+
+    if (!group) {
+      throw new NotFoundException('You are not part of any group');
+    }
+
+    const project = await this.projectModel
+      .findOne({ group: group._id })
+      .select('githubRepositoryUrl githubMarks githubFeedback githubEvaluatedAt group')
+      .populate('group', 'name');
+
+    if (!project) {
+      throw new NotFoundException('No project found for your group');
+    }
+
+    if (!project.githubRepositoryUrl) {
+      return {
+        message: 'No GitHub repository submitted yet',
+        github: null,
+      };
+    }
+
+    return {
+      message: 'GitHub repository retrieved successfully',
+      github: {
+        githubRepositoryUrl: project.githubRepositoryUrl,
+        githubMarks: project.githubMarks,
+        githubFeedback: project.githubFeedback,
+        githubEvaluatedAt: project.githubEvaluatedAt,
+        groupName: (project.group as any)?.name,
+      },
+    };
   }
 }

@@ -20,20 +20,24 @@ export class SupervisorEvaluationService {
       .findById(id)
       .populate({
         path: 'group',
+        select: '-isRegisteredForFYP',
         populate: [
           { path: 'leader', select: 'firstName lastName email rollNumber' },
           { path: 'members', select: 'firstName lastName email rollNumber' },
         ],
-      })
-      .populate('supervisor', 'firstName lastName email');
+      });
 
     if (!project) {
       throw new NotFoundException('Project not found');
     }
 
+    // Check supervisor ID before populating (supervisor is stored as string reference)
     if (project.supervisor.toString() !== supervisorId) {
       throw new ForbiddenException('You can only view projects from your assigned groups');
     }
+
+    // Now populate supervisor details for the response
+    await project.populate('supervisor', 'firstName lastName email');
 
     return {
       projectId: project._id,
@@ -71,6 +75,7 @@ export class SupervisorEvaluationService {
       .findById(id)
       .populate({
         path: 'group',
+        select: '-isRegisteredForFYP',
         populate: [
           { path: 'leader', select: 'firstName lastName email' },
           { path: 'members', select: 'firstName lastName email' },
@@ -91,6 +96,7 @@ export class SupervisorEvaluationService {
       })
       .populate({
         path: 'group',
+        select: '-isRegisteredForFYP',
         populate: [
           { path: 'leader', select: 'firstName lastName email rollNumber' },
           { path: 'members', select: 'firstName lastName email rollNumber' },
@@ -130,6 +136,7 @@ export class SupervisorEvaluationService {
       .findById(id)
       .populate({
         path: 'group',
+        select: '-isRegisteredForFYP',
         populate: [
           { path: 'leader', select: 'firstName lastName email' },
           { path: 'members', select: 'firstName lastName email' },
@@ -165,6 +172,7 @@ export class SupervisorEvaluationService {
       .findById(id)
       .populate({
         path: 'group',
+        select: '-isRegisteredForFYP',
         populate: [
           { path: 'leader', select: 'firstName lastName email' },
           { path: 'members', select: 'firstName lastName email' },
@@ -205,6 +213,7 @@ export class SupervisorEvaluationService {
       .findById(id)
       .populate({
         path: 'group',
+        select: '-isRegisteredForFYP',
         populate: [
           { path: 'leader', select: 'firstName lastName email' },
           { path: 'members', select: 'firstName lastName email' },

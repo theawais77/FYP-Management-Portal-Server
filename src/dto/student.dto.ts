@@ -64,3 +64,10 @@ export class UploadDocumentDto {
   @IsOptional()
   description?: string;
 }
+
+export class SubmitGithubDto {
+  @ApiProperty({ example: 'https://github.com/username/repository' })
+  @IsString()
+  @IsNotEmpty()
+  githubRepositoryUrl: string;
+}

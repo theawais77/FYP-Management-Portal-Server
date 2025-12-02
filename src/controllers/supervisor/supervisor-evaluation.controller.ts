@@ -20,7 +20,7 @@ export class SupervisorEvaluationController {
   constructor(private readonly service: SupervisorEvaluationService) {}
 
   @Get('projects/:id/github')
-  @ApiOperation({ summary: 'Get project GitHub details' })
+  @ApiOperation({ summary: 'Get project GitHub details (use Project ID, not Group ID)' })
   async getProjectGithub(
     @Param('id') id: string,
     @CurrentUser('userId') supervisorId: string,
@@ -29,7 +29,7 @@ export class SupervisorEvaluationController {
   }
 
   @Put('projects/:id/github/evaluate')
-  @ApiOperation({ summary: 'Evaluate GitHub repository' })
+  @ApiOperation({ summary: 'Evaluate GitHub repository (use Project ID, not Group ID)' })
   async evaluateGithub(
     @Param('id') id: string,
     @Body() dto: EvaluateGithubDto,

@@ -10,7 +10,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UserRole } from '../../common/constants/constants';
 import { ProjectService } from 'src/services/project/project.service';
-import { SelectIdeaDto, RequestCustomIdeaDto } from 'src/dto/student.dto';
+import { SelectIdeaDto, RequestCustomIdeaDto, SubmitGithubDto } from 'src/dto/student.dto';
 
 @ApiTags('Student - Projects')
 @Controller('projects')
@@ -49,5 +49,20 @@ export class ProjectController {
   @ApiOperation({ summary: 'Get own project details' })
   async getMyProject(@CurrentUser('userId') studentId: string) {
     return this.projectService.getMyProject(studentId);
+  }
+
+  @Post('github')
+  @ApiOperation({ summary: 'Submit GitHub repository URL' })
+  async submitGithub(
+    @Body() dto: SubmitGithubDto,
+    @CurrentUser('userId') studentId: string,
+  ) {
+    return this.projectService.submitGithub(dto, studentId);
+  }
+
+  @Get('github/my')
+  @ApiOperation({ summary: 'View submitted GitHub repository' })
+  async getMyGithub(@CurrentUser('userId') studentId: string) {
+    return this.projectService.getMyGithub(studentId);
   }
 }

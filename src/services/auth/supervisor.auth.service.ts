@@ -71,7 +71,9 @@ export class SupervisorAuthService {
 
     return {
       message: 'Login successful',
-      user: this.sanitizeUser(supervisor),
+      id: supervisor._id,
+      name: `${supervisor.firstName} ${supervisor.lastName}`,
+      department: supervisor.department,
       token,
     };
   }
