@@ -18,6 +18,7 @@ import { PresentationScheduleModule } from './presentation-schedule.module';
 import { StudentScheduleModule } from './student-schedule.module';
 import { SupervisorScheduleModule } from './supervisor-schedule.module';
 import { StudentDashboardModule } from './student-dashboard.module';
+import { SupervisorDashboardModule } from './supervisor-dashboard.module';
 import { AppController } from 'src/controllers/app.controller';
 import { AppService } from 'src/services/app.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -46,6 +47,7 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
     StudentScheduleModule,
     SupervisorScheduleModule,
     StudentDashboardModule,
+    SupervisorDashboardModule,
   ],
   controllers: [AppController],
   providers: [
