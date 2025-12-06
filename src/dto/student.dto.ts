@@ -12,12 +12,13 @@ export class CreateGroupDto {
   @ApiProperty({ example: 'Team Alpha' })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  groupName: string;
 
-  @ApiProperty({ example: 'Computer Science' })
-  @IsString()
-  @IsNotEmpty()
-  department: string;
+  @ApiProperty({ example: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'], description: 'Array of member IDs' })
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  members?: string[];
 }
 
 export class AddMemberDto {

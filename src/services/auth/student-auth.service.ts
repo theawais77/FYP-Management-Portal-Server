@@ -88,6 +88,39 @@ export class StudentAuthService {
     return this.sanitizeUser(student);
   }
 
+  async searchStudents(search: string) {
+    if (!search || search.trim().length < 2) {
+      return {
+        message: 'Please enter at least 2 characters to search',
+        students: [],
+      };
+    }
+
+    const searchRegex = new RegExp(search, 'i');
+    
+    const students = await this.studentModel
+      .find({
+        $and: [
+          { isRegisteredForFYP: true },
+          {
+            $or: [
+              { firstName: searchRegex },
+              { lastName: searchRegex },
+              { email: searchRegex },
+              { rollNumber: searchRegex },
+            ],
+          },
+        ],
+      })
+      .select('firstName lastName email rollNumber department')
+      .limit(10);
+
+    return {
+      message: 'Search results retrieved successfully',
+      students,
+    };
+  }
+
   private generateToken(userId: string, email: string, role: UserRole): string {
     const payload: JwtPayload = { sub: userId, email, role };
     return this.jwtService.sign(payload);

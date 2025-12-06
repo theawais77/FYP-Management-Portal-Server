@@ -38,15 +38,50 @@ export class GroupService {
       throw new ConflictException('Student is already part of a group');
     }
 
+    // Validate all members if provided
+    const allMembers = [studentId];
+    
+    if (dto.members && dto.members.length > 0) {
+      // Check if members exceed limit (max 2 additional members + leader = 3 total)
+      if (dto.members.length > 2) {
+        throw new BadRequestException('Maximum 2 additional members allowed (3 members total including leader)');
+      }
+
+      // Validate each member
+      for (const memberId of dto.members) {
+        const member = await this.studentModel.findById(memberId);
+        
+        if (!member) {
+          throw new NotFoundException(`Member with ID ${memberId} not found`);
+        }
+
+        if (!member.isRegisteredForFYP) {
+          throw new BadRequestException(`Member ${member.firstName} ${member.lastName} must be registered for FYP`);
+        }
+
+        // Check if member is already in any group
+        const memberGroup = await this.groupModel.findOne({
+          $or: [{ leader: memberId }, { members: memberId }],
+        });
+
+        if (memberGroup) {
+          throw new ConflictException(`Member ${member.firstName} ${member.lastName} is already part of a group`);
+        }
+
+        allMembers.push(memberId);
+      }
+    }
+
     const group = await this.groupModel.create({
-      ...dto,
+      name: dto.groupName,
       leader: studentId,
-      members: [studentId],
+      members: allMembers,
     });
 
     return {
       message: 'Group created successfully',
-      group: await group.populate('leader', 'firstName lastName rollNumber'),
+      group: await group.populate('leader', 'firstName lastName rollNumber email')
+        .then(g => g.populate('members', 'firstName lastName rollNumber email')),
     };
   }
 

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UserRole } from 'src/common/constants/constants';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
@@ -33,5 +33,13 @@ export class StudentAuthController {
   @ApiOperation({ summary: 'Get student profile' })
   async getProfile(@CurrentUser('userId') userId: string) {
     return this.studentAuthService.getProfile(userId);
+  }
+
+  @Get('search')
+  @ApiBearerAuth()
+  @Roles(UserRole.STUDENT)
+  @ApiOperation({ summary: 'Search students for group formation' })
+  async searchStudents(@Query('search') search: string) {
+    return this.studentAuthService.searchStudents(search);
   }
 }
