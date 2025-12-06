@@ -33,6 +33,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
+  app.enableCors();
   await app.listen(process.env.PORT ?? 3003).then(() => {
     console.log(
       `Application is running on http://localhost:${process.env.PORT ?? 3003}/docs`,
