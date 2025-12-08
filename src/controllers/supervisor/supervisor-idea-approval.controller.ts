@@ -19,6 +19,33 @@ import { ApproveIdeaDto, RejectIdeaDto } from '../../dto/supervisor.dto';
 export class SupervisorIdeaApprovalController {
   constructor(private readonly service: SupervisorIdeaApprovalService) {}
 
+  @Get('assigned-groups')
+  @ApiOperation({ summary: 'Get all assigned groups with complete details' })
+  async getAllAssignedGroups(@CurrentUser('userId') supervisorId: string) {
+    const groups = await this.service.getAllAssignedGroups(supervisorId);
+    return {
+      statusCode: 200,
+      message: 'Assigned groups retrieved successfully',
+      data: groups,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  @Get('assigned-groups/:id')
+  @ApiOperation({ summary: 'Get single assigned group by ID with complete details' })
+  async getAssignedGroupById(
+    @Param('id') groupId: string,
+    @CurrentUser('userId') supervisorId: string,
+  ) {
+    const group = await this.service.getAssignedGroupById(groupId, supervisorId);
+    return {
+      statusCode: 200,
+      message: 'Group details retrieved successfully',
+      data: group,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   @Get('custom-ideas')
   @ApiOperation({ summary: 'Get all custom ideas pending approval' })
   async getCustomIdeas(@CurrentUser('userId') supervisorId: string) {
