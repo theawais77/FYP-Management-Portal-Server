@@ -280,9 +280,8 @@ export class SupervisorDashboardService {
     });
 
     const selectedIdeas = await this.projectModel.countDocuments({
-      projectIdea: { $ne: null },
-      group: { $in: groupIds },
-      isCustomIdea: false,
+      selectedIdea: { $ne: null },
+      supervisor: supervisorId,
     });
 
     const personalProjectIdeas = {
