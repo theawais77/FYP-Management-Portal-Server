@@ -3,12 +3,12 @@ import {
   Get,
   Put,
   Param,
-  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/constants/constants';
 import { CoordinatorService } from 'src/services/coordinator/coordinator.service';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Coordinator - Groups Management')
 @Controller('coordinator/groups')
@@ -18,17 +18,15 @@ export class CoordinatorGroupController {
   constructor(private readonly coordinatorService: CoordinatorService) {}
 
   @Get()
-  @ApiOperation({ summary: 'View all groups' })
-  @ApiQuery({ name: 'departmentId', required: false, type: String })
-  async getAllGroups(@Query('departmentId') departmentId?: string) {
-    return this.coordinatorService.getAllGroups(departmentId);
+  @ApiOperation({ summary: 'View all groups in coordinator department' })
+  async getAllGroups(@CurrentUser('userId') coordinatorId: string) {
+    return this.coordinatorService.getAllGroups(coordinatorId);
   }
 
   @Get('without-supervisor')
-  @ApiOperation({ summary: 'Get groups without assigned supervisor' })
-  @ApiQuery({ name: 'departmentId', required: false, type: String })
-  async getGroupsWithoutSupervisor(@Query('departmentId') departmentId?: string) {
-    return this.coordinatorService.getGroupsWithoutSupervisor(departmentId);
+  @ApiOperation({ summary: 'Get groups without assigned supervisor in coordinator department' })
+  async getGroupsWithoutSupervisor(@CurrentUser('userId') coordinatorId: string) {
+    return this.coordinatorService.getGroupsWithoutSupervisor(coordinatorId);
   }
 
   @Get(':id')

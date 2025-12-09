@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 import { BaseUser } from './base-user.schema';
 import { UserRole } from '../common/constants/constants';
 
@@ -17,8 +17,8 @@ export class Coordinator extends BaseUser {
   @Prop({ required: true, trim: true, unique: true })
   coordinatorId: string;
 
-  @Prop({ required: true, trim: true })
-  department: string;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Department', required: true })
+  department: MongooseSchema.Types.ObjectId;
 
   @Prop({ trim: true })
   officeAddress?: string;

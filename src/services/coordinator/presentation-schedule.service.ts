@@ -9,6 +9,7 @@ import { Model } from 'mongoose';
 import { PresentationSchedule, PresentationScheduleDocument } from 'src/schema/presentation-schedule.schema';
 import { EvaluationPanel, EvaluationPanelDocument } from 'src/schema/evaluation-panel.schema';
 import { Group, GroupDocument } from 'src/schema/group.schema';
+import { Coordinator, CoordinatorDocument } from 'src/schema/coordinator.schema';
 import { CreateScheduleDto, UpdateScheduleDto, AutoScheduleDto, SwapScheduleDto } from 'src/dto/coordinator.dto';
 
 @Injectable()
@@ -17,6 +18,7 @@ export class PresentationScheduleService {
     @InjectModel(PresentationSchedule.name) private scheduleModel: Model<PresentationScheduleDocument>,
     @InjectModel(EvaluationPanel.name) private panelModel: Model<EvaluationPanelDocument>,
     @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
+    @InjectModel(Coordinator.name) private coordinatorModel: Model<CoordinatorDocument>,
   ) {}
 
   async create(dto: CreateScheduleDto, coordinatorId: string) {
@@ -95,11 +97,14 @@ export class PresentationScheduleService {
     };
   }
 
-  async findAll(department?: string, date?: string) {
-    const query: any = {};
-    if (department) {
-      query.department = department;
+  async findAll(coordinatorId: string, date?: string) {
+    const coordinator = await this.coordinatorModel.findById(coordinatorId).populate('department');
+    if (!coordinator) {
+      throw new NotFoundException('Coordinator not found');
     }
+
+    const department = coordinator.department as any;
+    const query: any = { department: department.name };
     if (date) {
       query.date = new Date(date);
     }

@@ -2,12 +2,12 @@ import {
   Controller,
   Get,
   Param,
-  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/constants/constants';
 import { CoordinatorService } from 'src/services/coordinator/coordinator.service';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Coordinator - Projects Monitoring')
 @Controller('projects')
@@ -17,10 +17,9 @@ export class CoordinatorProjectMonitorController {
   constructor(private readonly coordinatorService: CoordinatorService) {}
 
   @Get()
-  @ApiOperation({ summary: 'View all projects' })
-  @ApiQuery({ name: 'departmentId', required: false, type: String })
-  async getAllProjects(@Query('departmentId') departmentId?: string) {
-    return this.coordinatorService.getAllProjects(departmentId);
+  @ApiOperation({ summary: 'View all projects in coordinator department' })
+  async getAllProjects(@CurrentUser('userId') coordinatorId: string) {
+    return this.coordinatorService.getAllProjects(coordinatorId);
   }
 
   @Get(':id')

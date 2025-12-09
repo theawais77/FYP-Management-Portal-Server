@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { Student, StudentSchema } from '../schema/student.schema';
 import { Supervisor, SupervisorSchema } from '../schema/supervisor.schema';
 import { Coordinator, CoordinatorSchema } from '../schema/coordinator.schema';
+import { Department, DepartmentSchema } from '../schema/department.schema';
 import { JWT_CONFIG } from '../common/constants/constants';
 import { CoordinatorAuthController } from 'src/controllers/auth/coordinator-auth.controller';
 import { StudentAuthController } from 'src/controllers/auth/student-auth.controller';
@@ -20,6 +21,7 @@ import { JwtStrategy } from 'src/strategies/jwt.strategy';
       { name: Student.name, schema: StudentSchema },
       { name: Supervisor.name, schema: SupervisorSchema },
       { name: Coordinator.name, schema: CoordinatorSchema },
+      { name: Department.name, schema: DepartmentSchema },
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({

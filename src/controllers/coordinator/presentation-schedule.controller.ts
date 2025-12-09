@@ -32,14 +32,13 @@ export class PresentationScheduleController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all presentation schedules' })
-  @ApiQuery({ name: 'department', required: false })
+  @ApiOperation({ summary: 'Get all presentation schedules in coordinator department' })
   @ApiQuery({ name: 'date', required: false })
   async findAll(
-    @Query('department') department?: string,
+    @CurrentUser('userId') coordinatorId: string,
     @Query('date') date?: string,
   ) {
-    return this.scheduleService.findAll(department, date);
+    return this.scheduleService.findAll(coordinatorId, date);
   }
 
   @Get(':id')

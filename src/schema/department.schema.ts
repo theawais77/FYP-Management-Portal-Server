@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type DepartmentDocument = Department & Document;
 
@@ -13,6 +13,9 @@ export class Department {
 
   @Prop({ trim: true })
   description?: string;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Coordinator' })
+  coordinator?: MongooseSchema.Types.ObjectId;
 
   @Prop({ type: [{ type: String, ref: 'Supervisor' }], default: [] })
   facultyList: string[]; // Array of supervisor IDs

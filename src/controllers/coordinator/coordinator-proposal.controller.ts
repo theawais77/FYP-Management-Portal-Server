@@ -2,12 +2,12 @@ import {
   Controller,
   Get,
   Param,
-  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/constants/constants';
 import { CoordinatorService } from 'src/services/coordinator/coordinator.service';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Coordinator - Proposals Monitoring')
 @Controller('proposals')
@@ -17,10 +17,9 @@ export class CoordinatorProposalMonitorController {
   constructor(private readonly coordinatorService: CoordinatorService) {}
 
   @Get()
-  @ApiOperation({ summary: 'View all proposals' })
-  @ApiQuery({ name: 'departmentId', required: false, type: String })
-  async getAllProposals(@Query('departmentId') departmentId?: string) {
-    return this.coordinatorService.getAllProposals(departmentId);
+  @ApiOperation({ summary: 'View all proposals in coordinator department' })
+  async getAllProposals(@CurrentUser('userId') coordinatorId: string) {
+    return this.coordinatorService.getAllProposals(coordinatorId);
   }
 
   @Get(':id')

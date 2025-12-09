@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, Matches, IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, Matches, IsEnum, IsNumber, IsOptional, IsMongoId } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '../common/constants/constants';
 
@@ -180,4 +180,46 @@ export class SetSupervisorPasswordDto {
     message: 'Password must contain uppercase, lowercase, number and special character'
   })
   newPassword: string;
+}
+
+export class CreateCoordinatorDto {
+  @ApiProperty({ example: 'John' })
+  @IsString()
+  @IsNotEmpty()
+  firstName: string;
+
+  @ApiProperty({ example: 'Doe' })
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
+
+  @ApiProperty({ example: 'john.coordinator@university.edu' })
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty({ example: 'COORD-002' })
+  @IsString()
+  @IsNotEmpty()
+  coordinatorId: string;
+
+  @ApiProperty({ example: '507f1f77bcf86cd799439011', description: 'Department ObjectId' })
+  @IsMongoId()
+  @IsNotEmpty()
+  department: string;
+
+  @ApiProperty({ example: 'FYP Coordinator', required: false })
+  @IsString()
+  @IsOptional()
+  designation?: string;
+
+  @ApiProperty({ example: 'Room 201', required: false })
+  @IsString()
+  @IsOptional()
+  officeAddress?: string;
+
+  @ApiProperty({ example: '03001234567', required: false })
+  @IsString()
+  @IsOptional()
+  phoneNumber?: string;
 }

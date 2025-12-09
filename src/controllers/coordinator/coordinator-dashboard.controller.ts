@@ -5,6 +5,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/constants/constants';
 import { CoordinatorDashboardService } from '../../services/coordinator/coordinator-dashboard.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('dashboard/coordinator')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -16,7 +17,7 @@ export class CoordinatorDashboardController {
   ) {}
 
   @Get()
-  async getDashboard() {
-    return this.coordinatorDashboardService.getDashboard();
+  async getDashboard(@CurrentUser('userId') coordinatorId: string) {
+    return this.coordinatorDashboardService.getDashboard(coordinatorId);
   }
 }

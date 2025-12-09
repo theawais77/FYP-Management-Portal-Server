@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PresentationSchedule, PresentationScheduleSchema } from '../schema/presentation-schedule.schema';
 import { EvaluationPanel, EvaluationPanelSchema } from '../schema/evaluation-panel.schema';
 import { Group, GroupSchema } from '../schema/group.schema';
+import { Coordinator, CoordinatorSchema } from '../schema/coordinator.schema';
 import { PresentationScheduleController } from '../controllers/coordinator/presentation-schedule.controller';
 import { PresentationScheduleService } from '../services/coordinator/presentation-schedule.service';
 
@@ -12,6 +13,7 @@ import { PresentationScheduleService } from '../services/coordinator/presentatio
       { name: PresentationSchedule.name, schema: PresentationScheduleSchema },
       { name: EvaluationPanel.name, schema: EvaluationPanelSchema },
       { name: Group.name, schema: GroupSchema },
+      { name: Coordinator.name, schema: CoordinatorSchema },
     ]),
   ],
   controllers: [PresentationScheduleController],

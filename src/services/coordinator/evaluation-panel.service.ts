@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EvaluationPanel, EvaluationPanelDocument } from 'src/schema/evaluation-panel.schema';
 import { Supervisor, SupervisorDocument } from 'src/schema/supervisor.schema';
+import { Coordinator, CoordinatorDocument } from 'src/schema/coordinator.schema';
 import { CreatePanelDto, UpdatePanelDto } from 'src/dto/coordinator.dto';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class EvaluationPanelService {
   constructor(
     @InjectModel(EvaluationPanel.name) private panelModel: Model<EvaluationPanelDocument>,
     @InjectModel(Supervisor.name) private supervisorModel: Model<SupervisorDocument>,
+    @InjectModel(Coordinator.name) private coordinatorModel: Model<CoordinatorDocument>,
   ) {}
 
   async create(dto: CreatePanelDto, coordinatorId: string) {
@@ -50,11 +52,14 @@ export class EvaluationPanelService {
     };
   }
 
-  async findAll(department?: string) {
-    const query: any = {};
-    if (department) {
-      query.department = department;
+  async findAll(coordinatorId: string) {
+    const coordinator = await this.coordinatorModel.findById(coordinatorId).populate('department');
+    if (!coordinator) {
+      throw new NotFoundException('Coordinator not found');
     }
+
+    const department = coordinator.department as any;
+    const query: any = { department: department.name };
 
     const panels = await this.panelModel
       .find(query)

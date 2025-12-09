@@ -32,10 +32,9 @@ export class EvaluationPanelController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all evaluation panels' })
-  @ApiQuery({ name: 'department', required: false })
-  async findAll(@Query('department') department?: string) {
-    return this.panelService.findAll(department);
+  @ApiOperation({ summary: 'Get all evaluation panels in coordinator department' })
+  async findAll(@CurrentUser('userId') coordinatorId: string) {
+    return this.panelService.findAll(coordinatorId);
   }
 
   @Get(':id')

@@ -10,6 +10,8 @@ import { FYPDocument, FYPDocumentDocument } from '../../schema/document.schema';
 import { PresentationSchedule, PresentationScheduleDocument } from '../../schema/presentation-schedule.schema';
 import { EvaluationPanel, EvaluationPanelDocument } from '../../schema/evaluation-panel.schema';
 import { Announcement, AnnouncementDocument } from '../../schema/announcement.schema';
+import { Coordinator, CoordinatorDocument } from '../../schema/coordinator.schema';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class CoordinatorDashboardService {
@@ -23,36 +25,32 @@ export class CoordinatorDashboardService {
     @InjectModel(PresentationSchedule.name) private scheduleModel: Model<PresentationScheduleDocument>,
     @InjectModel(EvaluationPanel.name) private panelModel: Model<EvaluationPanelDocument>,
     @InjectModel(Announcement.name) private announcementModel: Model<AnnouncementDocument>,
+    @InjectModel(Coordinator.name) private coordinatorModel: Model<CoordinatorDocument>,
   ) {}
 
-  async getDashboard() {
+  async getDashboard(coordinatorId: string) {
+    const coordinator = await this.coordinatorModel.findById(coordinatorId).populate('department');
+    if (!coordinator) {
+      throw new NotFoundException('Coordinator not found');
+    }
+
+    const department = coordinator.department as any;
+    const departmentName = department.name;
+
     // A. Users Summary
-    const totalStudents = await this.studentModel.countDocuments();
+    const totalStudents = await this.studentModel.countDocuments({ department: departmentName });
     const studentsRegisteredForFYP = await this.studentModel.countDocuments({
+      department: departmentName,
       isRegisteredForFYP: true,
     });
     const studentsNotRegistered = totalStudents - studentsRegisteredForFYP;
-    const totalSupervisors = await this.supervisorModel.countDocuments();
+    const totalSupervisors = await this.supervisorModel.countDocuments({ department: departmentName });
 
-    // Faculty per department
-    const facultyByDepartment = await this.supervisorModel.aggregate([
-      {
-        $group: {
-          _id: '$department',
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          department: '$_id',
-          count: 1,
-          _id: 0,
-        },
-      },
-      {
-        $sort: { department: 1 },
-      },
-    ]);
+    // Faculty per department (only coordinator's department)
+    const facultyByDepartment = [{
+      department: departmentName,
+      count: totalSupervisors,
+    }];
 
     const usersSummary = {
       totalStudents,
@@ -63,20 +61,24 @@ export class CoordinatorDashboardService {
     };
 
     // B. Group / Project Overview
-    const totalGroups = await this.groupModel.countDocuments();
+    const totalGroups = await this.groupModel.countDocuments({ department: departmentName });
     const groupsWithSupervisor = await this.groupModel.countDocuments({
+      department: departmentName,
       assignedSupervisor: { $exists: true, $ne: null },
     });
     const groupsWithoutSupervisor = totalGroups - groupsWithSupervisor;
 
-    // Projects pending approval (either custom ideas or selected ideas)
-    const projectSelectionsPendingApproval = await this.projectModel.countDocuments({
-      ideaStatus: 'pending',
-    });
+    // Projects pending approval (filter by department through group)
+    const allProjects = await this.projectModel.find().populate('group').lean();
+    const departmentProjects = allProjects.filter((p: any) => p.group?.department === departmentName);
+    
+    const projectSelectionsPendingApproval = departmentProjects.filter(
+      (p: any) => p.ideaStatus === 'pending'
+    ).length;
 
-    const projectSelectionsApproved = await this.projectModel.countDocuments({
-      ideaStatus: 'approved',
-    });
+    const projectSelectionsApproved = departmentProjects.filter(
+      (p: any) => p.ideaStatus === 'approved'
+    ).length;
 
     const groupProjectOverview = {
       totalGroups,
@@ -89,13 +91,14 @@ export class CoordinatorDashboardService {
     // C. Schedules & Panels
     const now = new Date();
     const upcomingPresentationsCount = await this.scheduleModel.countDocuments({
+      department: departmentName,
       date: { $gte: now },
     });
 
-    const totalPanelsCreated = await this.panelModel.countDocuments();
+    const totalPanelsCreated = await this.panelModel.countDocuments({ department: departmentName });
 
     // Check for schedule conflicts by looking for duplicate date+time+room or date+time+panel
-    const allSchedules = await this.scheduleModel.find().lean();
+    const allSchedules = await this.scheduleModel.find({ department: departmentName }).lean();
     let scheduleConflictsDetected = 0;
     const seenCombinations = new Set<string>();
     
@@ -112,7 +115,7 @@ export class CoordinatorDashboardService {
 
     // Get next presentation slot
     const nextPresentation = await this.scheduleModel
-      .findOne({ date: { $gte: now } })
+      .findOne({ department: departmentName, date: { $gte: now } })
       .sort({ date: 1, timeSlot: 1 })
       .populate('group', 'name')
       .lean();
@@ -134,23 +137,37 @@ export class CoordinatorDashboardService {
     };
 
     // D. Proposals & Documents
-    const proposalsSubmitted = await this.proposalModel.countDocuments({
-      status: 'submitted',
-    });
+    const allProposalsWithGroups = await this.proposalModel.find().populate({
+      path: 'project',
+      populate: { path: 'group' }
+    }).lean();
+    
+    const departmentProposals = allProposalsWithGroups.filter(
+      (p: any) => p.project?.group?.department === departmentName
+    );
 
-    const proposalsApproved = await this.proposalModel.countDocuments({
-      status: 'approved',
-    });
+    const proposalsSubmitted = departmentProposals.filter(
+      (p: any) => p.status === 'submitted'
+    ).length;
 
-    const proposalsRejected = await this.proposalModel.countDocuments({
-      status: 'rejected',
-    });
+    const proposalsApproved = departmentProposals.filter(
+      (p: any) => p.status === 'approved'
+    ).length;
 
-    const documentsUploaded = await this.documentModel.countDocuments();
+    const proposalsRejected = departmentProposals.filter(
+      (p: any) => p.status === 'rejected'
+    ).length;
 
-    const documentsPendingReview = await this.documentModel.countDocuments({
-      status: 'pending',
-    });
+    const allDocumentsWithGroups = await this.documentModel.find().populate('group').lean();
+    const departmentDocuments = allDocumentsWithGroups.filter(
+      (d: any) => d.group?.department === departmentName
+    );
+
+    const documentsUploaded = departmentDocuments.length;
+
+    const documentsPendingReview = departmentDocuments.filter(
+      (d: any) => d.status === 'pending'
+    ).length;
 
     const proposalsAndDocuments = {
       proposalSummary: {
@@ -166,7 +183,7 @@ export class CoordinatorDashboardService {
 
     // E. Supervisor Availability
     const supervisors = await this.supervisorModel
-      .find()
+      .find({ department: departmentName })
       .select('firstName lastName department maxStudents currentStudentCount isAvailableForSupervision')
       .lean();
 
@@ -196,7 +213,7 @@ export class CoordinatorDashboardService {
 
     // F. Announcements
     const recentAnnouncements = await this.announcementModel
-      .find()
+      .find({ department: departmentName })
       .sort({ _id: -1 })
       .limit(5)
       .populate('createdBy', 'firstName lastName')

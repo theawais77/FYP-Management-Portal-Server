@@ -1,17 +1,19 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Coordinator, CoordinatorDocument } from '../../schema/coordinator.schema';
-import { UserRole } from '../../common/constants/constants';
-import { LoginDto } from 'src/dto/auth.dto';
+import { Department, DepartmentDocument } from '../../schema/department.schema';
+import { UserRole, BCRYPT_SALT_ROUNDS } from '../../common/constants/constants';
+import { LoginDto, CreateCoordinatorDto } from 'src/dto/auth.dto';
 import { JwtPayload } from 'src/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class CoordinatorAuthService {
   constructor(
     @InjectModel(Coordinator.name) private coordinatorModel: Model<CoordinatorDocument>,
+    @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>,
     private jwtService: JwtService,
   ) {}
 
@@ -37,13 +39,93 @@ export class CoordinatorAuthService {
   }
 
   async getProfile(userId: string) {
-    const coordinator = await this.coordinatorModel.findById(userId);
+    const coordinator = await this.coordinatorModel.findById(userId).populate('department');
 
     if (!coordinator) {
       throw new UnauthorizedException('Coordinator not found');
     }
 
     return this.sanitizeUser(coordinator);
+  }
+
+  async register(dto: CreateCoordinatorDto) {
+    // Check if coordinator with email already exists
+    const existingCoordinator = await this.coordinatorModel.findOne({ email: dto.email });
+    if (existingCoordinator) {
+      throw new ConflictException('Coordinator with this email already exists');
+    }
+
+    // Check if coordinator ID already exists
+    const existingCoordinatorId = await this.coordinatorModel.findOne({ coordinatorId: dto.coordinatorId });
+    if (existingCoordinatorId) {
+      throw new ConflictException('Coordinator ID already exists');
+    }
+
+    // Verify department exists
+    const department = await this.departmentModel.findById(dto.department);
+    if (!department) {
+      throw new NotFoundException('Department not found');
+    }
+
+    // Check if department already has a coordinator
+    if (department.coordinator) {
+      throw new ConflictException('This department already has a coordinator assigned');
+    }
+
+    // Generate a temporary password
+    const tempPassword = `Coord${Math.random().toString(36).slice(-8)}!`;
+    const hashedPassword = await bcrypt.hash(tempPassword, BCRYPT_SALT_ROUNDS);
+
+    const coordinator = await this.coordinatorModel.create({
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      email: dto.email,
+      password: hashedPassword,
+      role: UserRole.COORDINATOR,
+      coordinatorId: dto.coordinatorId,
+      department: dto.department,
+      designation: dto.designation,
+      officeAddress: dto.officeAddress,
+      phoneNumber: dto.phoneNumber,
+    });
+
+    // Update department with coordinator reference
+    await this.departmentModel.findByIdAndUpdate(dto.department, {
+      coordinator: coordinator._id,
+    });
+
+    return {
+      message: 'Coordinator registered successfully',
+      coordinator: this.sanitizeUser(coordinator),
+      tempPassword, // Send this securely to the coordinator
+    };
+  }
+
+  async deleteCoordinator(coordinatorId: string) {
+    const coordinator = await this.coordinatorModel.findById(coordinatorId);
+
+    if (!coordinator) {
+      throw new NotFoundException('Coordinator not found');
+    }
+
+    const departmentId = coordinator.department;
+
+    // Remove coordinator reference from department
+    await this.departmentModel.findByIdAndUpdate(departmentId, {
+      $unset: { coordinator: '' },
+    });
+
+    // Delete the coordinator
+    await this.coordinatorModel.findByIdAndDelete(coordinatorId);
+
+    return {
+      message: 'Coordinator deleted successfully',
+      deletedCoordinator: {
+        id: coordinator._id,
+        email: coordinator.email,
+        coordinatorId: coordinator.coordinatorId,
+      },
+    };
   }
 
   private generateToken(userId: string, email: string, role: UserRole): string {

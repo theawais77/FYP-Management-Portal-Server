@@ -11,6 +11,7 @@ import { FYPDocument, FYPDocumentSchema } from '../schema/document.schema';
 import { PresentationSchedule, PresentationScheduleSchema } from '../schema/presentation-schedule.schema';
 import { EvaluationPanel, EvaluationPanelSchema } from '../schema/evaluation-panel.schema';
 import { Announcement, AnnouncementSchema } from '../schema/announcement.schema';
+import { Coordinator, CoordinatorSchema } from '../schema/coordinator.schema';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { Announcement, AnnouncementSchema } from '../schema/announcement.schema'
       { name: PresentationSchedule.name, schema: PresentationScheduleSchema },
       { name: EvaluationPanel.name, schema: EvaluationPanelSchema },
       { name: Announcement.name, schema: AnnouncementSchema },
+      { name: Coordinator.name, schema: CoordinatorSchema },
     ]),
   ],
   controllers: [CoordinatorDashboardController],

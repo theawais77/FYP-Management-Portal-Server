@@ -10,6 +10,7 @@ import { Supervisor, SupervisorDocument } from 'src/schema/supervisor.schema';
 import { Project, ProjectDocument } from 'src/schema/project.schema';
 import { Proposal, ProposalDocument } from 'src/schema/proposal.schema';
 import { Department, DepartmentDocument } from 'src/schema/department.schema';
+import { Coordinator, CoordinatorDocument } from 'src/schema/coordinator.schema';
 import { UpdateSupervisorAvailabilityDto } from 'src/dto/coordinator.dto';
 
 @Injectable()
@@ -20,17 +21,17 @@ export class CoordinatorService {
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
     @InjectModel(Proposal.name) private proposalModel: Model<ProposalDocument>,
     @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>,
+    @InjectModel(Coordinator.name) private coordinatorModel: Model<CoordinatorDocument>,
   ) {}
 
-  async getAllGroups(departmentId?: string) {
-    const query: any = {};
-    
-    if (departmentId) {
-      const department = await this.departmentModel.findById(departmentId);
-      if (department) {
-        query.department = department.name;
-      }
+  async getAllGroups(coordinatorId: string) {
+    const coordinator = await this.coordinatorModel.findById(coordinatorId).populate('department');
+    if (!coordinator) {
+      throw new NotFoundException('Coordinator not found');
     }
+
+    const department = coordinator.department as any;
+    const query: any = { department: department.name };
 
     const groups = await this.groupModel
       .find(query)
@@ -67,15 +68,14 @@ export class CoordinatorService {
     };
   }
 
-  async getGroupsWithoutSupervisor(departmentId?: string) {
-    const query: any = { assignedSupervisor: null };
-    
-    if (departmentId) {
-      const department = await this.departmentModel.findById(departmentId);
-      if (department) {
-        query.department = department.name;
-      }
+  async getGroupsWithoutSupervisor(coordinatorId: string) {
+    const coordinator = await this.coordinatorModel.findById(coordinatorId).populate('department');
+    if (!coordinator) {
+      throw new NotFoundException('Coordinator not found');
     }
+
+    const department = coordinator.department as any;
+    const query: any = { assignedSupervisor: null, department: department.name };
 
     const groups = await this.groupModel
       .find(query)
@@ -235,15 +235,14 @@ export class CoordinatorService {
   }
 
 
-  async getAllSupervisors(departmentId?: string) {
-    const query: any = {};
-    
-    if (departmentId) {
-      const department = await this.departmentModel.findById(departmentId);
-      if (department) {
-        query.department = department.name;
-      }
+  async getAllSupervisors(coordinatorId: string) {
+    const coordinator = await this.coordinatorModel.findById(coordinatorId).populate('department');
+    if (!coordinator) {
+      throw new NotFoundException('Coordinator not found');
     }
+
+    const department = coordinator.department as any;
+    const query: any = { department: department.name };
 
     const supervisors = await this.supervisorModel
       .find(query)
@@ -264,15 +263,14 @@ export class CoordinatorService {
     }));
   }
 
-  async getSupervisorAvailability(departmentId?: string) {
-    const query: any = {};
-    
-    if (departmentId) {
-      const department = await this.departmentModel.findById(departmentId);
-      if (department) {
-        query.department = department.name;
-      }
+  async getSupervisorAvailability(coordinatorId: string) {
+    const coordinator = await this.coordinatorModel.findById(coordinatorId).populate('department');
+    if (!coordinator) {
+      throw new NotFoundException('Coordinator not found');
     }
+
+    const department = coordinator.department as any;
+    const query: any = { department: department.name };
 
     const supervisors = await this.supervisorModel
       .find(query)
@@ -330,16 +328,15 @@ export class CoordinatorService {
     };
   }
 
-  async getAllProjects(departmentId?: string) {
-    const query: any = {};
-
-    let departmentName: string | undefined;
-    if (departmentId) {
-      const department = await this.departmentModel.findById(departmentId);
-      if (department) {
-        departmentName = department.name;
-      }
+  async getAllProjects(coordinatorId: string) {
+    const coordinator = await this.coordinatorModel.findById(coordinatorId).populate('department');
+    if (!coordinator) {
+      throw new NotFoundException('Coordinator not found');
     }
+
+    const department = coordinator.department as any;
+    const departmentName = department.name;
+    const query: any = {};
 
     const projects = await this.projectModel
       .find(query)
@@ -390,14 +387,14 @@ export class CoordinatorService {
     };
   }
 
-  async getAllProposals(departmentId?: string) {
-    let departmentName: string | undefined;
-    if (departmentId) {
-      const department = await this.departmentModel.findById(departmentId);
-      if (department) {
-        departmentName = department.name;
-      }
+  async getAllProposals(coordinatorId: string) {
+    const coordinator = await this.coordinatorModel.findById(coordinatorId).populate('department');
+    if (!coordinator) {
+      throw new NotFoundException('Coordinator not found');
     }
+
+    const department = coordinator.department as any;
+    const departmentName = department.name;
 
     const proposals = await this.proposalModel
       .find()
