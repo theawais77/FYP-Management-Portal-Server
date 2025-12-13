@@ -131,7 +131,12 @@ export class SupervisorScheduleService {
       .sort({ date: 1, timeSlot: 1 });
 
     // Separate scheduled and unscheduled groups
-    const scheduledGroupIds = new Set(schedules.map(s => s.group.toString()));
+    const scheduledGroupIds = new Set(
+      schedules.map(s => {
+        const group = s.group as any;
+        return group._id ? group._id.toString() : group.toString();
+      })
+    );
     const unscheduledGroups = assignedGroups.filter(
       g => !scheduledGroupIds.has(g._id.toString())
     );
