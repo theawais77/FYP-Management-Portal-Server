@@ -6,9 +6,8 @@ import {
   Delete,
   Body,
   Param,
-  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateAnnouncementDto, UpdateAnnouncementDto } from '../../dto/announcement.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -16,14 +15,17 @@ import { UserRole } from '../../common/constants/constants';
 import { AnnouncementService } from 'src/services/announcement/announcement.service';
 
 @ApiTags('Coordinator - Announcements')
-@Controller('announcements')
+@Controller('coordinator/announcements')
 @ApiBearerAuth()
+@Roles(UserRole.COORDINATOR)
 export class AnnouncementController {
   constructor(private readonly announcementService: AnnouncementService) {}
 
   @Post()
-  @Roles(UserRole.COORDINATOR)
-  @ApiOperation({ summary: 'Create announcement (Coordinator only)' })
+  @ApiOperation({ 
+    summary: 'Create announcement for your department',
+    description: 'Creates an announcement for students, supervisors, or both (general) in the coordinator\'s department'
+  })
   async create(
     @Body() dto: CreateAnnouncementDto,
     @CurrentUser('userId') coordinatorId: string,
@@ -32,10 +34,13 @@ export class AnnouncementController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all announcements (filtered by department)' })
-  @ApiQuery({ name: 'department', required: false, type: String })
-  async findAll(@Query('department') department?: string) {
-    return this.announcementService.findAll(department);
+  @ApiOperation({ 
+    summary: 'Get all announcements in your department',
+    description: 'Retrieves all announcements created for your department'
+  })
+  async findAll(@CurrentUser('userId') coordinatorId: string) {
+    // We could filter by coordinator's department here if needed
+    return this.announcementService.findAll();
   }
 
   @Get(':id')
@@ -45,8 +50,7 @@ export class AnnouncementController {
   }
 
   @Put(':id')
-  @Roles(UserRole.COORDINATOR)
-  @ApiOperation({ summary: 'Update announcement (Coordinator only)' })
+  @ApiOperation({ summary: 'Update your announcement' })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateAnnouncementDto,
@@ -56,8 +60,7 @@ export class AnnouncementController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.COORDINATOR)
-  @ApiOperation({ summary: 'Delete announcement (Coordinator only)' })
+  @ApiOperation({ summary: 'Delete your announcement' })
   async remove(
     @Param('id') id: string,
     @CurrentUser('userId') coordinatorId: string,

@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Coordinator, CoordinatorDocument } from '../../schema/coordinator.schema';
 import { Department, DepartmentDocument } from '../../schema/department.schema';
+import { Student, StudentDocument } from '../../schema/student.schema';
 import { UserRole, BCRYPT_SALT_ROUNDS } from '../../common/constants/constants';
 import { LoginDto, CreateCoordinatorDto } from 'src/dto/auth.dto';
 import { JwtPayload } from 'src/interfaces/jwt-payload.interface';
@@ -14,6 +15,7 @@ export class CoordinatorAuthService {
   constructor(
     @InjectModel(Coordinator.name) private coordinatorModel: Model<CoordinatorDocument>,
     @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>,
+    @InjectModel(Student.name) private studentModel: Model<StudentDocument>,
     private jwtService: JwtService,
   ) {}
 
@@ -45,7 +47,20 @@ export class CoordinatorAuthService {
       throw new UnauthorizedException('Coordinator not found');
     }
 
-    return this.sanitizeUser(coordinator);
+    // Calculate actual student count for the department
+    const coordinatorObj = coordinator.toObject();
+    if (coordinatorObj.department) {
+      const departmentName = (coordinatorObj.department as any).name;
+      const actualStudentCount = await this.studentModel.countDocuments({ 
+        department: departmentName 
+      });
+      
+    // Update the totalStudents field with actual count
+      (coordinatorObj.department as any).totalStudents = actualStudentCount;
+    }
+
+    const { password, ...coordinatorWithoutPassword } = coordinatorObj;
+    return coordinatorWithoutPassword;
   }
 
   async register(dto: CreateCoordinatorDto) {
