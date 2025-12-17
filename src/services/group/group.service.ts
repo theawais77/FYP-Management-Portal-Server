@@ -76,6 +76,7 @@ export class GroupService {
       name: dto.groupName,
       leader: studentId,
       members: allMembers,
+      department: student.department, // Automatically get department from student
     });
 
     return {
