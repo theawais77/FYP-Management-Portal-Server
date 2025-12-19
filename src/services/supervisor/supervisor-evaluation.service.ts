@@ -94,6 +94,7 @@ export class SupervisorEvaluationService {
         supervisor: supervisorId,
         ideaStatus: ProjectStatus.APPROVED,
       })
+      .select('+customIdeaTitle +customIdeaDescription') // Include custom idea fields
       .populate({
         path: 'group',
         select: '-isRegisteredForFYP',

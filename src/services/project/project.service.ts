@@ -224,7 +224,7 @@ export class ProjectService {
 
     const project = await this.projectModel
       .findOne({ group: group._id })
-      .select('githubRepositoryUrl githubMarks githubFeedback githubEvaluatedAt group')
+      .select('githubRepositoryUrl finalGithubMarks githubFeedback githubEvaluatedAt group')
       .populate('group', 'name');
 
     if (!project) {
@@ -242,7 +242,7 @@ export class ProjectService {
       message: 'GitHub repository retrieved successfully',
       github: {
         githubRepositoryUrl: project.githubRepositoryUrl,
-        githubMarks: project.githubMarks,
+        githubMarks: project.finalGithubMarks,
         githubFeedback: project.githubFeedback,
         githubEvaluatedAt: project.githubEvaluatedAt,
         groupName: (project.group as any)?.name,

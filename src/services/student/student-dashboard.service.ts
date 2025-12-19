@@ -128,7 +128,7 @@ export class StudentDashboardService {
       ideaFeedback: project?.supervisorFeedback || null,
       ideaRejectionReason: project?.rejectionReason || null,
       githubFeedback: project?.githubFeedback || null,
-      githubMarks: project?.githubMarks || null,
+      githubMarks: project?.finalGithubMarks || null,
       finalEvaluationFeedback: project?.finalFeedback || null,
       totalMarks: project?.totalMarks || null,
       proposalMarks: project?.proposalMarks || null,

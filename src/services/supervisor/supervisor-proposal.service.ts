@@ -7,6 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Proposal, ProposalDocument, ProposalStatus } from 'src/schema/proposal.schema';
+import { Group, GroupDocument } from 'src/schema/group.schema';
 import { ApproveProposalDto, RejectProposalDto, CommentProposalDto } from 'src/dto/supervisor.dto';
 
 @Injectable()
@@ -14,15 +15,30 @@ export class SupervisorProposalService {
   constructor(
     @InjectModel(Proposal.name)
     private proposalModel: Model<ProposalDocument>,
+    @InjectModel(Group.name)
+    private groupModel: Model<GroupDocument>,
   ) {}
 
   // Get all proposals for supervisor's groups
   async getProposals(supervisorId: string) {
+    // First, find all groups assigned to this supervisor
+    const assignedGroups = await this.groupModel
+      .find({ assignedSupervisor: supervisorId });
+
+    if (!assignedGroups || assignedGroups.length === 0) {
+      return [];
+    }
+
+    const groupIds = assignedGroups.map(g => g._id);
+
+    // Find proposals from these groups (excluding drafts)
     const proposals = await this.proposalModel
-      .find({ status: { $in: [ProposalStatus.SUBMITTED, ProposalStatus.APPROVED, ProposalStatus.REJECTED] } })
+      .find({ 
+        group: { $in: groupIds },
+        status: { $ne: ProposalStatus.DRAFT } // Exclude drafts, show submitted, approved, and rejected
+      })
       .populate({
         path: 'project',
-        match: { supervisor: supervisorId },
         populate: [
           {
             path: 'group',
@@ -31,14 +47,15 @@ export class SupervisorProposalService {
               { path: 'members', select: 'firstName lastName email rollNumber' },
             ],
           },
+          { path: 'supervisor', select: 'firstName lastName email designation' },
           { path: 'selectedIdea' },
         ],
       })
+      .populate('group', 'name department assignedSupervisor')
       .populate('uploadedBy', 'firstName lastName email')
       .sort({ submittedAt: -1 });
 
-    // Filter out proposals where project doesn't match
-    return proposals.filter((p) => p.project);
+    return proposals;
   }
 
   // Get single proposal
@@ -59,14 +76,16 @@ export class SupervisorProposalService {
           { path: 'selectedIdea' },
         ],
       })
+      .populate('group', 'name department assignedSupervisor')
       .populate('uploadedBy', 'firstName lastName email');
 
     if (!proposal) {
       throw new NotFoundException('Proposal not found');
     }
 
-    const project = proposal.project as any;
-    if (project.supervisor._id.toString() !== supervisorId) {
+    // Check if the group is assigned to this supervisor
+    const group = proposal.group as any;
+    if (!group.assignedSupervisor || group.assignedSupervisor.toString() !== supervisorId) {
       throw new ForbiddenException('You can only view proposals from your assigned groups');
     }
 
@@ -75,14 +94,14 @@ export class SupervisorProposalService {
 
   // Approve proposal
   async approveProposal(id: string, dto: ApproveProposalDto, supervisorId: string) {
-    const proposal = await this.proposalModel.findById(id).populate('project');
+    const proposal = await this.proposalModel.findById(id).populate('group', 'assignedSupervisor');
 
     if (!proposal) {
       throw new NotFoundException('Proposal not found');
     }
 
-    const project = proposal.project as any;
-    if (project.supervisor.toString() !== supervisorId) {
+    const group = proposal.group as any;
+    if (!group.assignedSupervisor || group.assignedSupervisor.toString() !== supervisorId) {
       throw new ForbiddenException('You can only approve proposals from your assigned groups');
     }
 
@@ -119,14 +138,14 @@ export class SupervisorProposalService {
 
   // Reject proposal
   async rejectProposal(id: string, dto: RejectProposalDto, supervisorId: string) {
-    const proposal = await this.proposalModel.findById(id).populate('project');
+    const proposal = await this.proposalModel.findById(id).populate('group', 'assignedSupervisor');
 
     if (!proposal) {
       throw new NotFoundException('Proposal not found');
     }
 
-    const project = proposal.project as any;
-    if (project.supervisor.toString() !== supervisorId) {
+    const group = proposal.group as any;
+    if (!group.assignedSupervisor || group.assignedSupervisor.toString() !== supervisorId) {
       throw new ForbiddenException('You can only reject proposals from your assigned groups');
     }
 
@@ -163,14 +182,14 @@ export class SupervisorProposalService {
 
   // Add comment to proposal
   async addComment(id: string, dto: CommentProposalDto, supervisorId: string) {
-    const proposal = await this.proposalModel.findById(id).populate('project');
+    const proposal = await this.proposalModel.findById(id).populate('group', 'assignedSupervisor');
 
     if (!proposal) {
       throw new NotFoundException('Proposal not found');
     }
 
-    const project = proposal.project as any;
-    if (project.supervisor.toString() !== supervisorId) {
+    const group = proposal.group as any;
+    if (!group.assignedSupervisor || group.assignedSupervisor.toString() !== supervisorId) {
       throw new ForbiddenException('You can only comment on proposals from your assigned groups');
     }
 
