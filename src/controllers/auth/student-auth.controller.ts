@@ -13,10 +13,11 @@ import { StudentAuthService } from 'src/services/auth/student-auth.service';
 export class StudentAuthController {
   constructor(private studentAuthService: StudentAuthService) {}
 
-  @Public()
-  @Post('register')
-  @ApiOperation({ summary: 'Student self-registration' })
-  async register(@Body() dto: StudentRegisterDto) {
+  @Post('create')
+  @ApiBearerAuth()
+  @Roles(UserRole.COORDINATOR)
+  @ApiOperation({ summary: 'Create student (Coordinator only)' })
+  async create(@Body() dto: StudentRegisterDto) {
     return this.studentAuthService.register(dto);
   }
 
