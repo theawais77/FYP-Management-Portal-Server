@@ -1,98 +1,226 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# FYP Management Portal - Server
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend API for a role-based Final Year Project (FYP) Management Portal built with NestJS and MongoDB.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This service handles the full project lifecycle for:
+- Students: group formation, project selection, proposal/document submission, schedules.
+- Supervisors: project idea management, approvals, proposal/document review, evaluations.
+- Coordinators: department oversight, faculty/group/project/proposal monitoring, announcements, panel and schedule management.
 
-## Description
+## What This API Covers
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- JWT-based authentication and role-based authorization.
+- End-to-end FYP workflow across student, supervisor, and coordinator personas.
+- Proposal/document upload pipeline with server-side validation.
+- Presentation panel and schedule management.
+- Dashboard endpoints for each role.
+- OpenAPI (Swagger) docs with Bearer auth support.
 
-## Project setup
+## Tech Stack
 
-```bash
-$ npm install
+- Framework: NestJS 11, TypeScript
+- Database: MongoDB + Mongoose
+- Auth: Passport JWT + bcrypt
+- API docs: Swagger (at /docs)
+- Validation: class-validator + class-transformer
+- Security: helmet + global guards/filters/interceptors
+- File upload: Multer (disk storage)
+
+## Architecture Overview
+
+### Runtime behavior
+
+On startup, the app:
+- Loads environment config from .env.
+- Connects to MongoDB using CONNECTION_STRING.
+- Applies global validation pipe (whitelist + transform).
+- Applies global exception filter and interceptors.
+- Enables CORS and Helmet.
+- Serves upload files statically at /uploads.
+- Exposes Swagger docs at /docs.
+
+### Security model
+
+- Authentication: JWT bearer token.
+- Authorization: role-based with custom @Roles decorator.
+- Roles:
+  - student
+  - supervisor
+  - coordinator
+- Public endpoints are explicitly marked with @Public.
+
+## Core Modules
+
+- auth: coordinator/student/supervisor login and account flows
+- student: registration profile, projects, proposals, groups, student dashboards/schedule
+- supervisor: project ideas, approvals, reviews, evaluation, supervisor dashboards/schedule
+- coordinator: departments, faculty, groups, monitoring, announcements, panels, schedules, dashboard
+- shared/common: guards, decorators, filters, interceptors, constants
+
+## Domain Model (MongoDB Schemas)
+
+Major collections/entities:
+- users: base user model abstraction
+- students
+- supervisors
+- coordinators
+- departments
+- groups
+- projects
+- project ideas
+- proposals
+- documents
+- announcements
+- evaluation panels
+- presentation schedules
+
+Relationships are represented with ObjectId references (for example: group -> supervisor, project -> group, proposal -> project/group/uploader, schedule -> group/panel).
+
+## API Groups
+
+Swagger tags organize endpoints by workflow:
+- Coordinator Auth
+- Student Auth
+- Supervisor Auth
+- Coordinator - Departments, Faculty, User Management, Groups, Projects Monitoring, Proposals Monitoring, Announcements, Evaluation Panels, Presentation Schedules, Dashboard
+- Student - FYP Registration, Groups, Projects, Proposals & Documents, Announcements, Presentation Schedule, Dashboard
+- Supervisor - Project Ideas, Idea Approvals, Proposals, Documents, Evaluations, Presentation Schedules, Announcements, Dashboard
+
+Visit:
+- http://localhost:3003/docs
+
+## Environment Variables
+
+Create a .env file in the server root:
+
+```env
+CONNECTION_STRING=mongodb://localhost:27017/fyp_management
+JWT_SECRET=replace-with-a-long-random-secret
+PORT=3003
 ```
 
-## Compile and run the project
+Notes:
+- CONNECTION_STRING is required.
+- JWT_SECRET must be set for any non-local environment.
+- PORT defaults to 3003 if omitted.
+
+## Local Setup
+
+### 1) Install dependencies
+
+```bash
+npm install
+```
+
+### 2) Configure environment
+
+Create .env using the template above.
+
+### 3) Run seed (optional but recommended)
+
+```bash
+npm run seed:coordinator
+```
+
+Default seeded coordinator:
+- Email: coordinator@university.edu
+- Password: Coordinator@123
+- Coordinator ID: COORD-001
+
+### 4) Start server
 
 ```bash
 # development
-$ npm run start
+npm run start:dev
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# production
+npm run build
+npm run start:prod
 ```
 
-## Run tests
+## Scripts
 
 ```bash
-# unit tests
-$ npm run test
+npm run build
+npm run format
+npm run lint
 
-# e2e tests
-$ npm run test:e2e
+npm run start
+npm run start:dev
+npm run start:debug
+npm run start:prod
 
-# test coverage
-$ npm run test:cov
+npm run test
+npm run test:watch
+npm run test:cov
+npm run test:debug
+npm run test:e2e
+
+npm run seed:coordinator
 ```
 
-## Deployment
+## Health Check
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Public endpoint:
+- GET /health-check
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## File Uploads
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+Student upload endpoints store files under:
+- uploads/proposals
+- uploads/documents
+
+Current behavior in code:
+- Max file size is 10 MB.
+- File filter currently enforces .rar extension.
+- Swagger summaries still mention ZIP in a few places, but backend checks are RAR-based.
+
+If you want ZIP support, align the Multer file filter and Swagger descriptions together.
+
+## Response and Error Shape
+
+Successful responses are wrapped by a global transform interceptor:
+
+```json
+{
+  "statusCode": 200,
+  "message": "Success",
+  "data": {},
+  "timestamp": "2026-01-01T00:00:00.000Z"
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Errors are normalized by a global exception filter with fields like statusCode, timestamp, path, method, message, and error.
 
-## Resources
+## Security Notes
 
-Check out a few resources that may come in handy when working with NestJS:
+Before production deployment, review these items:
+- Set a strong JWT_SECRET (avoid default fallback).
+- Restrict CORS origins.
+- Review public coordinator endpoints (register/delete currently marked public for testing).
+- Ensure upload directories and file policies meet your security standards.
+- Consider filtering sensitive fields in logs.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## ERD Utility
 
-## Support
+There is an ERD helper script:
+- generate-erd-puml.js
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+It scans compiled schema output and writes PlantUML. Review and sanitize any hardcoded connection data before sharing publicly.
 
-## Stay in touch
+## Project Structure (Server)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```text
+src/
+  common/          # guards, decorators, filters, interceptors, constants
+  controllers/     # role-specific route handlers
+  dto/             # request/response contracts and validation
+  interfaces/      # shared TS interfaces
+  modules/         # Nest feature modules
+  schema/          # Mongoose schemas
+  services/        # business logic
+  scripts/         # utility seed scripts
+  strategies/      # JWT strategy
+test/
+uploads/
+``
